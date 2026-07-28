@@ -1,10 +1,3 @@
-default:
-  adapter: postgresql
-  user: <%= ENV["DATABASE_USER"] %>
-  port: <%= ENV["DATABASE_PORT"] %>
-  password: <%= ENV["DATABASE_PASSWORD"] %>
-  host: <%= ENV["DATABASE_HOST"] %>
-
 development:
   adapter: postgresql
   database: <%= ENV["DATABASE_NAME"] %>
@@ -14,21 +7,12 @@ development:
   host: <%= ENV["DATABASE_HOST"] %>
 
 production:
-  primary:
-    adapter: postgresql
-    database: <%= ENV["DATABASE_NAME"] %>
-    user: <%= ENV["DATABASE_USER"] %>
-    port: <%= ENV["DATABASE_PORT"] %>
-    password: <%= ENV["DATABASE_PASSWORD"] %>
-    host: <%= ENV["DATABASE_HOST"] %>
-  cable:
-    <<: *default
-    database: bitspace-cable
-    migrations_path: db/cable_migrate
-  cache:
-    <<: *default
-    database: bitspace-cache
-    migrations_path: db/cache_migrate
+  adapter: postgresql
+  database: <%= ENV["DATABASE_NAME"] %>
+  user: <%= ENV["DATABASE_USER"] %>
+  port: <%= ENV["DATABASE_PORT"] %>
+  password: <%= ENV["DATABASE_PASSWORD"] %>
+  host: <%= ENV["DATABASE_HOST"] %>
 
 
 # default: &default
