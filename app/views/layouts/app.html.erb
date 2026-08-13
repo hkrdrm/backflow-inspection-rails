@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%= render "layouts/partials/head" %>
+  </head>
+
+  <body class="min-h-screen bg-surface text-ink">
+    <div class="flex min-h-screen" data-controller="mobile-menu" data-action="turbo:load->mobile-menu#close">
+      <%# Sidebar: fixed drawer on small screens, static column from lg up. %>
+      <div data-mobile-menu-target="menu"
+           class="hidden fixed inset-y-0 left-0 z-40 shadow-xl lg:static lg:z-auto lg:block lg:shadow-none">
+        <%= render "layouts/partials/app_sidebar" %>
+      </div>
+
+      <div class="flex min-w-0 flex-1 flex-col">
+        <%= render "layouts/partials/app_topbar" %>
+
+        <main class="flex-1 px-4 py-6 lg:px-8">
+          <% if notice %>
+            <div class="mb-4 rounded-xl border border-ok-pale bg-ok-pale/40 px-4 py-3 text-sm font-semibold text-ok">
+              <%= notice %>
+            </div>
+          <% end %>
+          <% if alert %>
+            <div class="mb-4 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm font-semibold text-danger">
+              <%= alert %>
+            </div>
+          <% end %>
+
+          <%= yield %>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

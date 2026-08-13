@@ -1,0 +1,8 @@
+<% @page_title = "Edit #{@plumber.name}" %>
+
+<div class="mx-auto max-w-7xl">
+  <h1 class="text-2xl font-bold text-navy">Edit <%= @plumber.name %></h1>
+
+  <%= render "form", plumber: @plumber, url: plumber_path(@plumber),
+        method: :patch, submit_label: "Save changes" %>
+</div>

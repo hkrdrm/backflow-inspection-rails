@@ -1,11 +1,29 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Anton", "Arial Narrow", sans-serif;
+  --font-display: "Inter", ui-sans-serif, sans-serif;
   --font-sans: "Inter", ui-sans-serif, sans-serif;
 
-  --color-ink: #0d1114;
-  --color-brand-green: #5c7a1e;
-  --color-brand-green-dark: #4a621a;
-  --color-brand-orange: #dd440c;
+  /* Sampled from the brand asset sheet swatch row. */
+  --color-navy: #002761;
+  --color-navy-deep: #001c47;
+  --color-brand: #0065dc;
+  --color-brand-dark: #0252ba;
+  --color-sky: #4bbbfd;
+  --color-sky-pale: #cbebfd;
+
+  --color-ok: #069773;
+  --color-ok-pale: #a2e2d0;
+  --color-warn: #fec953;
+  /* Chart-safe amber: #fec953 fails contrast and the lightness band as a data
+     mark on a white surface, so data marks use this darker step instead. */
+  --color-warn-strong: #c47f0a;
+  --color-accent: #fe9330;
+  --color-danger: #fd4855;
+
+  --color-muted: #a0aab5;
+  --color-line: #dde4eb;
+  --color-tint: #edf4fd;
+  --color-surface: #f6f8fb;
+  --color-ink: #0f172a;
 }

@@ -12,11 +12,21 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root "home#index"
 
-  get  "contact"                => "home#contact",    as: :contact
-  get  "comics"                 => "comics#index",    as: :comics
-  get  "issues"                 => "issues#index",    as: :issues
-  get  "issues/:id"             => "issues#show"
-  get  "dashboard"              => "dashboard#index", as: :dashboard
-  get  "dashboard/new_issue"    => "dashboard#new_issue"
-  post "dashboard/create_issue" => "dashboard#create_issue"
+  get "dashboard" => "dashboard#show", as: :dashboard
+
+  resources :plumbers, only: [ :index, :new, :create, :edit, :update ]
+
+  namespace :super_admin, path: "super-admin" do
+    resources :tenants, only: [ :index, :new, :create, :edit, :update ] do
+      member do
+        patch :activate
+        patch :deactivate
+      end
+    end
+
+    root to: "tenants#index"
+  end
+
+  get "about"   => "home#about",   as: :about
+  get "contact" => "home#contact", as: :contact
 end

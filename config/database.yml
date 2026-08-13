@@ -6,6 +6,17 @@ development:
   password: <%= ENV["DATABASE_PASSWORD"] %>
   host: <%= ENV["DATABASE_HOST"] %>
 
+test:
+  adapter: postgresql
+  # One connection so a request issued by an integration test runs on the same
+  # connection as the test's wrapping transaction and can see its data.
+  max_connections: 1
+  database: <%= ENV.fetch("TEST_DATABASE_NAME") { "#{ENV['DATABASE_NAME']}-test" } %>
+  user: <%= ENV["DATABASE_USER"] %>
+  port: <%= ENV["DATABASE_PORT"] %>
+  password: <%= ENV["DATABASE_PASSWORD"] %>
+  host: <%= ENV["DATABASE_HOST"] %>
+
 production:
   adapter: postgresql
   database: <%= ENV["DATABASE_NAME"] %>

@@ -1,0 +1,39 @@
+<%= form_with model: plumber, url: url, method: method,
+      class: "mt-6 max-w-xl rounded-2xl border border-line bg-white p-6" do |f| %>
+  <% if plumber.errors.any? %>
+    <div class="mb-4 rounded-xl border border-danger/30 bg-danger/10 p-4 text-sm font-semibold text-danger">
+      <ul class="list-disc pl-4">
+        <% plumber.errors.each do |field, messages| %>
+          <% Array(messages).each do |message| %>
+            <li><%= "#{Array(field).join(" and ").humanize} #{message}" %></li>
+          <% end %>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% [ [ :name, "Name" ], [ :company_name, "Company" ], [ :email, "Email" ],
+       [ :phone, "Phone" ], [ :cert_number, "Certification number" ] ].each do |field, label| %>
+    <div class="mb-4">
+      <%= f.label field, label, class: "block text-sm font-semibold text-navy" %>
+      <%= f.text_field field, class: "mt-1 w-full rounded-xl border border-line px-3 py-2 focus:border-brand focus:outline-none" %>
+    </div>
+  <% end %>
+
+  <div class="mb-4">
+    <%= f.label :cert_status, "Certification status", class: "block text-sm font-semibold text-navy" %>
+    <%= f.select :cert_status, Plumber::CERT_STATUSES.map { |s| [ s.capitalize, s ] }, {},
+          class: "mt-1 w-full rounded-xl border border-line px-3 py-2 focus:border-brand focus:outline-none" %>
+  </div>
+
+  <div class="mb-4">
+    <%= f.label :cert_date, "Certification date", class: "block text-sm font-semibold text-navy" %>
+    <%= f.date_field :cert_date, class: "mt-1 w-full rounded-xl border border-line px-3 py-2 focus:border-brand focus:outline-none" %>
+  </div>
+
+  <div class="flex items-center gap-4">
+    <%= f.submit submit_label,
+          class: "cursor-pointer rounded-xl bg-brand px-5 py-3 text-sm font-bold text-white shadow-sm hover:bg-brand-dark" %>
+    <%= link_to "Cancel", plumbers_path, class: "text-sm font-semibold text-muted hover:text-navy" %>
+  </div>
+<% end %>

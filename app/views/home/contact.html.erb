@@ -4,36 +4,26 @@
   <section class="max-w-4xl mx-auto px-6 pt-12 pb-16 md:pt-16 text-center">
     <h1 class="font-display text-5xl md:text-6xl leading-[0.95] tracking-tight">
       <span class="block text-black">GET IN</span>
-      <span class="block text-brand-green">TOUCH.</span>
+      <span class="block text-brand">TOUCH.</span>
     </h1>
     <p class="mt-6 text-lg text-gray-700 max-w-md mx-auto">
-      Got a design, a project, or just a question? Reach out &mdash; Matt Spiers, the designer &amp; printmaker behind Bitspace Studio, will get back to you.
+      Replace this with a sentence telling visitors when and why to reach out.
     </p>
   </section>
 
   <%= render "shared/section_divider" %>
 
-  <%# ---------- Email cards ---------- %>
+  <%# ---------- Contact card ---------- %>
   <section class="max-w-4xl mx-auto px-6 py-12">
     <div class="max-w-sm mx-auto">
-      <%= link_to "mailto:zerosum022@gmail.com", class: "group border-2 border-brand-green rounded-xl p-6 flex flex-col items-center text-center gap-2 hover:bg-brand-green transition-colors" do %>
-        <svg class="w-8 h-8 text-brand-green group-hover:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <%= link_to "mailto:hello@example.com", class: "group border-2 border-brand rounded-xl p-6 flex flex-col items-center text-center gap-2 hover:bg-brand transition-colors" do %>
+        <svg class="w-8 h-8 text-brand group-hover:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 6.75A2.25 2.25 0 015.25 4.5h13.5A2.25 2.25 0 0121 6.75v10.5A2.25 2.25 0 0118.75 19.5H5.25A2.25 2.25 0 013 17.25V6.75z" />
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75l8.25 6.75 8.25-6.75" />
         </svg>
         <div class="font-bold text-xs uppercase tracking-widest text-gray-500 group-hover:text-white/80">General Inquiries</div>
-        <div class="font-display text-lg text-black group-hover:text-white">zerosum022@gmail.com</div>
+        <div class="font-display text-lg text-black group-hover:text-white">hello@example.com</div>
       <% end %>
-    </div>
-
-    <div class="mt-12 text-center">
-      <div class="text-xs font-bold tracking-widest uppercase text-gray-500">Follow &amp; DM</div>
-      <div class="mt-4 flex justify-center gap-6">
-        <%= link_to "https://www.tiktok.com/@zerosum84", class: "flex items-center gap-2 font-bold text-sm text-gray-700 hover:text-brand-green" do %>
-          <%= image_tag "TikTok_Icon_Black_Circle.png", style: "height:28px; width:28px;", class: "rounded-full" %>
-          @zerosum84
-        <% end %>
-      </div>
     </div>
   </section>
 </div>
