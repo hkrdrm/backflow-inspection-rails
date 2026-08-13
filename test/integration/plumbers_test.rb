@@ -41,4 +41,15 @@ class PlumbersTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "td", { text: /Not Mine/, count: 0 }
   end
+
+  test "staff of a deactivated tenant are locked out" do
+    tenant = setup_tenant(slug: "summit", name: "City of Summit")
+    Plumber.create(tenant_id: tenant.id, name: "Dale Pike", cert_number: "MS-1001")
+    tenant.update(active: false)
+    sign_in create_account(email: "staff@example.com", tenant_id: tenant.id)
+
+    get "/plumbers"
+
+    assert_response :not_found
+  end
 end

@@ -17,7 +17,9 @@ module TenantScoped
 
   private
 
+  # Presence is not enough: a deactivated tenant keeps its rows but loses
+  # access, which is what the super admin area's deactivate action is for.
   def require_tenant
-    render_not_found unless current_tenant
+    render_not_found unless current_tenant&.active?
   end
 end
