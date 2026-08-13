@@ -1181,7 +1181,7 @@ and add an actions cell as the last `<td>` of each row, plus a matching `<th>`:
 - [ ] **Step 8: Run the tests**
 
 Run: `bin/rails test test/integration/plumbers_test.rb`
-Expected: PASS, 9 runs, 0 failures.
+Expected: PASS, 10 runs, 0 failures.
 
 - [ ] **Step 9: Rebuild CSS and run the full suite**
 
@@ -1190,7 +1190,7 @@ bin/rails tailwindcss:build
 bin/rails test
 ```
 
-Expected: PASS, 40 runs, 0 failures, 0 errors.
+Expected: PASS, 42 runs, 0 failures, 0 errors.
 
 - [ ] **Step 10: Check rubocop**
 
