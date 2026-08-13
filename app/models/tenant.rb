@@ -6,6 +6,7 @@ class Tenant < Sequel::Model
   plugin :timestamps, update_on_create: true
 
   one_to_many :accounts
+  one_to_many :plumbers
 
   def validate
     super
