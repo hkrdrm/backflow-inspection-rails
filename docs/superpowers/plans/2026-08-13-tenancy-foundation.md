@@ -296,9 +296,10 @@ In `test/test_helper.rb`, change the `create_account` signature and body from `c
     end
 ```
 
-- [ ] **Step 12: Update the renamed integration test**
+- [ ] **Step 12: Update the integration tests**
 
-In `test/integration/super_admin_tenants_test.rb`, apply:
+`test/integration/super_admin_access_test.rb` also hits `/super-admin/companies`
+in three tests, so both files need updating:
 
 ```bash
 sed -i \
@@ -308,6 +309,9 @@ sed -i \
   -e 's/company:/tenant:/g' \
   -e 's/\bcompany\b/tenant/g' \
   test/integration/super_admin_tenants_test.rb
+
+sed -i 's|/super-admin/companies|/super-admin/tenants|g' \
+  test/integration/super_admin_access_test.rb
 ```
 
 Confirm test names still read as English afterwards (e.g. "creates a tenant", "rejects a tenant with no name").
@@ -398,25 +402,21 @@ RAILS_ENV=test bin/rails db:migrate
 
 Expected: `db/structure.sql` contains `role text DEFAULT 'admin'::text NOT NULL` and `CONSTRAINT accounts_role_valid`.
 
-- [ ] **Step 5: Add the roles constant**
+- [ ] **Step 5: Run the tests**
 
-In `app/models/account.rb`, add below the plugins:
-
-```ruby
-  ROLES = %w[admin plumber].freeze
-```
-
-- [ ] **Step 6: Run the tests**
+No model change is needed — the check constraint is the single source of
+truth for allowed roles, and nothing in this slice reads the list from Ruby.
+Do **not** add an `Account::ROLES` constant; an unused constant is dead code.
 
 Run: `bin/rails test test/models/account_test.rb`
 Expected: PASS, 4 runs, 0 failures.
 
-- [ ] **Step 7: Run the full suite**
+- [ ] **Step 6: Run the full suite**
 
 Run: `bin/rails test`
 Expected: PASS, 23 runs, 0 failures, 0 errors.
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
 git add -A
@@ -439,7 +439,7 @@ split is coming; the column now avoids retrofitting scoped controllers."
 
 **Interfaces:**
 - Consumes: `Tenant` (Task 1), `accounts.tenant_id` (Task 1).
-- Produces: `Plumber` model with `many_to_one :tenant`, `many_to_one :account`, `Plumber::CERT_STATUSES` = `%w[pending verified expired revoked]`; `Tenant#plumbers` / `Tenant#plumbers_dataset`.
+- Produces: `Plumber` model with `many_to_one :tenant`, `many_to_one :account`, `Plumber::CERT_STATUSES` = `%w[pending verified expired revoked]`; `Tenant#plumbers` / `Tenant#plumbers_dataset`. `Plumber.new` carries the database defaults (`cert_status` `"pending"`, `active` `true`) via `plugin :defaults_setter`.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -576,6 +576,10 @@ class Plumber < Sequel::Model
   plugin :boolean_readers
   plugin :active_model
   plugin :timestamps, update_on_create: true
+  # Applies the database column defaults to new objects. Without it,
+  # cert_status is nil at validation time on an unsaved record and
+  # validates_includes below rejects it before the default can apply.
+  plugin :defaults_setter
 
   CERT_STATUSES = %w[pending verified expired revoked].freeze
 
