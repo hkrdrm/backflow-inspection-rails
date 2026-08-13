@@ -110,4 +110,25 @@ class PlumbersTest < ActionDispatch::IntegrationTest
 
     assert_response :not_found
   end
+
+  test "another tenant's plumber cannot be updated" do
+    mine = setup_tenant(slug: "mccomb", name: "City of McComb")
+    theirs = setup_tenant(slug: "summit", name: "City of Summit")
+    plumber = Plumber.create(tenant_id: theirs.id, name: "Not Mine", cert_number: "MS-2002")
+    sign_in create_account(email: "staff@example.com", tenant_id: mine.id)
+
+    patch "/plumbers/#{plumber.id}", params: { plumber: { name: "Hijacked" } }
+
+    assert_response :not_found
+    assert_equal "Not Mine", plumber.reload.name
+  end
+
+  test "a non-numeric plumber id is not found rather than an error" do
+    tenant = setup_tenant(slug: "mccomb", name: "City of McComb")
+    sign_in create_account(email: "staff@example.com", tenant_id: tenant.id)
+
+    get "/plumbers/abc/edit"
+
+    assert_response :not_found
+  end
 end

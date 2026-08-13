@@ -40,8 +40,10 @@ class PlumbersController < ApplicationController
   private
 
   # Looked up through the tenant, so another tenant's id is simply not found.
+  # to_i keeps a non-numeric id (e.g. /plumbers/abc/edit) a 404 rather than a
+  # PG::InvalidTextRepresentation 500.
   def set_plumber
-    @plumber = current_tenant.plumbers_dataset.first(id: params[:id])
+    @plumber = current_tenant.plumbers_dataset.first(id: params[:id].to_i)
 
     render_not_found unless @plumber
   end
