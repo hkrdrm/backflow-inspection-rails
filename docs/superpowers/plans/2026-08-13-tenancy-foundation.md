@@ -349,7 +349,7 @@ the plumber's employer, and the utility's customers."
 - Test: `test/models/account_test.rb`
 
 **Interfaces:**
-- Produces: `accounts.role` (text, not null, default `"admin"`, check constraint `admin`/`plumber`); `Account::ROLES` = `%w[admin plumber]`.
+- Produces: `accounts.role` (text, not null, default `"admin"`, check constraint `admin`/`plumber`). No Ruby-side constant — the constraint is the single source of truth.
 
 - [ ] **Step 1: Write the failing test**
 
