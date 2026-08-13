@@ -1,0 +1,8 @@
+<% @page_title = "Edit #{@company.name}" %>
+
+<div class="mx-auto max-w-5xl px-4 py-10">
+  <h1 class="text-2xl font-bold tracking-wide uppercase">Edit <%= @company.name %></h1>
+
+  <%= render "form", company: @company, url: super_admin_company_path(@company),
+        method: :patch, submit_label: "Save changes" %>
+</div>

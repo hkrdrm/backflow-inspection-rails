@@ -1,19 +1,24 @@
 <% if rodauth.logged_in? %>
   <div class="flex flex-row items-center gap-3">
-    <div class="flex justify-center items-center size-8 rounded-full bg-gray-800 ring-1 ring-white shrink-0 text-sm uppercase">
+    <div class="flex justify-center items-center size-8 rounded-full bg-navy text-white shrink-0 text-sm uppercase">
       <%= current_account.email.first %>
     </div>
 
     <span class="text-sm normal-case"><%= current_account.email %></span>
 
+    <% if current_account.super_admin? %>
+      <%= link_to "Super Admin", super_admin_root_path,
+            class: "font-bold text-sm tracking-wide uppercase underline decoration-2 underline-offset-4" %>
+    <% end %>
+
     <%= button_to "Logout", rodauth.logout_path, method: :post,
-          class: "font-bold text-sm tracking-wide uppercase underline decoration-2 underline-offset-4 text-brand-green" %>
+          class: "font-bold text-sm tracking-wide uppercase underline decoration-2 underline-offset-4 text-brand" %>
   </div>
 <% else %>
   <div class="flex flex-row items-center gap-4">
     <%= link_to "Login", rodauth.login_path, class: "font-bold text-sm tracking-wide uppercase" %>
 
     <%= link_to "Sign Up", rodauth.create_account_path,
-          class: "inline-flex shrink-0 items-center gap-2 bg-brand-green hover:bg-brand-green-dark text-white font-bold text-sm tracking-wide uppercase px-4 py-2 rounded" %>
+          class: "inline-flex shrink-0 items-center gap-2 bg-brand hover:bg-brand-dark text-white font-bold text-sm tracking-wide uppercase px-4 py-2 rounded" %>
   </div>
 <% end %>

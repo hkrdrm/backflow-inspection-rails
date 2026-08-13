@@ -1,0 +1,203 @@
+<% @page_title = "Dashboard" %>
+<% tone_classes = {
+     brand: "bg-tint text-brand",
+     ok:    "bg-ok-pale/50 text-ok",
+     warn:  "bg-warn/25 text-warn-strong"
+   } %>
+
+<div class="mx-auto max-w-7xl space-y-6">
+  <%# ---- Welcome + primary action ---- %>
+  <div class="flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-navy">
+        Welcome back, <%= current_account.email.split("@").first.capitalize %>.
+      </h1>
+      <p class="mt-1 text-sm text-muted">Here's what's happening with your backflow program.</p>
+    </div>
+
+    <span class="inline-flex cursor-default items-center gap-2 rounded-xl bg-brand px-5 py-3 text-sm font-bold text-white shadow-sm"
+          title="Not built yet">
+      <%= render "shared/icon", name: :plus, class: "size-5" %>
+      Schedule Inspection
+    </span>
+  </div>
+
+  <%# ---- Stat tiles ---- %>
+  <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <% @data[:stats].each do |stat| %>
+      <div class="rounded-2xl border border-line bg-white p-5">
+        <div class="flex items-start gap-4">
+          <span class="flex size-11 shrink-0 items-center justify-center rounded-xl <%= tone_classes[stat[:tone]] %>">
+            <%= render "shared/icon", name: stat[:icon], class: "size-5" %>
+          </span>
+
+          <div class="min-w-0">
+            <div class="text-sm font-semibold text-navy"><%= stat[:label] %></div>
+            <div class="mt-1 text-3xl font-bold leading-none text-navy"><%= stat[:value] %></div>
+            <div class="mt-2 text-xs font-semibold text-brand"><%= stat[:footnote] %></div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="grid gap-6 xl:grid-cols-3">
+    <%# ---- Upcoming inspections ---- %>
+    <div class="rounded-2xl border border-line bg-white xl:col-span-2">
+      <div class="flex items-center justify-between border-b border-line px-5 py-4">
+        <h2 class="font-bold text-navy">Upcoming Inspections</h2>
+        <span class="inline-flex cursor-default items-center gap-2 text-sm font-semibold text-brand" title="Not built yet">
+          <%= render "shared/icon", name: :calendar, class: "size-4" %>
+          View Calendar
+        </span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[640px] text-left text-sm">
+          <thead>
+            <tr class="text-xs uppercase tracking-wide text-muted">
+              <th class="px-5 py-3 font-semibold">Date &amp; Time</th>
+              <th class="px-5 py-3 font-semibold">Customer</th>
+              <th class="px-5 py-3 font-semibold">Address</th>
+              <th class="px-5 py-3 font-semibold">Plumber</th>
+              <th class="px-5 py-3 font-semibold">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @data[:inspections].each do |row| %>
+              <tr class="border-t border-line">
+                <td class="px-5 py-4 align-top">
+                  <div class="font-semibold text-navy"><%= row[:date] %></div>
+                  <div class="text-xs text-muted"><%= row[:time] %></div>
+                </td>
+                <td class="px-5 py-4 align-top text-navy"><%= row[:property] %></td>
+                <td class="px-5 py-4 align-top">
+                  <div class="text-navy"><%= row[:address] %></div>
+                  <div class="text-xs text-muted">McComb, MS 39648</div>
+                </td>
+                <td class="px-5 py-4 align-top text-navy"><%= row[:plumber] %></td>
+                <td class="px-5 py-4 align-top">
+                  <% scheduled = row[:status] == "Scheduled" %>
+                  <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold <%= scheduled ? 'bg-tint text-brand' : 'bg-warn/25 text-warn-strong' %>">
+                    <%= row[:status] %>
+                  </span>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="border-t border-line px-5 py-4">
+        <span class="cursor-default text-sm font-semibold text-brand" title="Not built yet">View All Inspections →</span>
+      </div>
+    </div>
+
+    <div class="space-y-6">
+      <%# ---- Inspection status donut ----
+          Three status slices. Colors are the validated status steps: past due
+          uses the darker warn-strong because the pill amber fails contrast as a
+          data mark. Every slice is direct-labeled in the legend, so identity is
+          never carried by color alone. %>
+      <div class="rounded-2xl border border-line bg-white p-5">
+        <h2 class="font-bold text-navy">Inspection Status Overview</h2>
+
+        <div class="mt-4 flex items-center gap-6">
+          <% circumference = 2 * Math::PI * 54 %>
+          <% offset = 0.0 %>
+          <svg viewBox="0 0 140 140" class="size-36 shrink-0 -rotate-90" role="img"
+               aria-label="<%= @data[:status_overview].map { |s| "#{s[:label]} #{s[:count]}" }.join(", ") %>">
+            <circle cx="70" cy="70" r="54" fill="none" stroke="var(--color-line)" stroke-width="18" />
+            <% @data[:status_overview].each do |slice| %>
+              <% length = circumference * slice[:count] / @status_total.to_f %>
+              <%# 2px surface gap between adjacent segments %>
+              <circle cx="70" cy="70" r="54" fill="none"
+                      stroke="<%= slice[:color] %>" stroke-width="18"
+                      stroke-dasharray="<%= [ length - 2, 0 ].max.round(2) %> <%= (circumference - length + 2).round(2) %>"
+                      stroke-dashoffset="<%= (-offset).round(2) %>" />
+              <% offset += length %>
+            <% end %>
+            <text x="70" y="66" transform="rotate(90 70 70)" text-anchor="middle"
+                  class="fill-navy text-[22px] font-bold"><%= @status_total %></text>
+            <text x="70" y="82" transform="rotate(90 70 70)" text-anchor="middle"
+                  class="fill-muted text-[10px]">Total</text>
+          </svg>
+
+          <ul class="min-w-0 flex-1 space-y-3 text-sm">
+            <% @data[:status_overview].each do |slice| %>
+              <li class="flex items-center justify-between gap-3">
+                <span class="flex items-center gap-2 whitespace-nowrap text-navy">
+                  <span class="size-2.5 shrink-0 rounded-full" style="background: <%= slice[:color] %>"></span>
+                  <%= slice[:label] %>
+                </span>
+                <span class="shrink-0 text-muted">
+                  <%= slice[:count] %> (<%= (100.0 * slice[:count] / @status_total).round %>%)
+                </span>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+
+      <%# ---- Recent activity ---- %>
+      <div class="rounded-2xl border border-line bg-white p-5">
+        <h2 class="font-bold text-navy">Recent Activity</h2>
+
+        <ul class="mt-4 space-y-4">
+          <% @data[:activity].each do |item| %>
+            <li class="flex items-start gap-3">
+              <span class="flex size-8 shrink-0 items-center justify-center rounded-lg <%= tone_classes[item[:tone]] %>">
+                <%= render "shared/icon", name: item[:icon], class: "size-4" %>
+              </span>
+
+              <div class="min-w-0 flex-1">
+                <div class="text-sm font-semibold text-navy"><%= item[:title] %></div>
+                <div class="text-xs text-muted"><%= item[:subject] %></div>
+              </div>
+
+              <div class="shrink-0 text-right text-xs text-muted">
+                <div><%= item[:day] %></div>
+                <div><%= item[:time] %></div>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+
+        <div class="mt-4 border-t border-line pt-4">
+          <span class="cursor-default text-sm font-semibold text-brand" title="Not built yet">View All Activity →</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# ---- Assurance band ---- %>
+  <div class="relative overflow-hidden rounded-2xl border border-line bg-white p-6">
+    <%= image_tag "wave-band.png", alt: "",
+          class: "pointer-events-none absolute bottom-0 right-0 w-80 opacity-20 select-none" %>
+
+    <div class="relative grid gap-6 md:grid-cols-4">
+      <div class="flex items-start gap-3">
+        <%= image_tag "backflow-mark-navy.png", alt: "", class: "size-12 shrink-0 rounded-xl" %>
+        <div>
+          <div class="font-bold leading-snug text-navy">Protecting our water.<br>Protecting our community.</div>
+          <p class="mt-2 text-xs leading-5 text-muted">
+            Backflow prevention protects our drinking water from contamination
+            and keeps our community safe.
+          </p>
+        </div>
+      </div>
+
+      <% @data[:assurances].each do |item| %>
+        <div class="flex items-start gap-3">
+          <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-tint text-brand">
+            <%= render "shared/icon", name: item[:icon], class: "size-4" %>
+          </span>
+          <div>
+            <div class="text-sm font-bold text-navy"><%= item[:title] %></div>
+            <p class="mt-1 text-xs leading-5 text-muted"><%= item[:body] %></p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

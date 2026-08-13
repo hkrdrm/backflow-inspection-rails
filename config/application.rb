@@ -29,6 +29,11 @@ module RailsRodauthSetup
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
 
+    # Dump db/structure.sql via pg_dump instead of db/schema.rb. The Ruby
+    # schema dumper loses the citext extension and partial indexes, so a
+    # schema.rb could not rebuild this database from scratch.
+    config.sequel.schema_format = :sql
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files

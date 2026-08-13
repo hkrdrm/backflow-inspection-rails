@@ -1,7 +1,7 @@
-<nav class="bg-ink text-white border-b-4 border-brand-green" data-controller="mobile-menu" data-action="turbo:load->mobile-menu#close">
+<nav class="bg-white text-navy border-b border-line" data-controller="mobile-menu" data-action="turbo:load->mobile-menu#close">
   <div class="flex flex-row items-center justify-between gap-6 px-8 py-3 max-w-7xl mx-auto">
-    <%= link_to root_path, class: "font-display text-2xl md:text-3xl tracking-wide flex items-center shrink-0" do %>
-      <span class="text-brand-green">YOUR</span><span class="inline-block w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-brand-orange mx-1"></span><span>APP</span>
+    <%= link_to root_path, class: "flex items-center shrink-0" do %>
+      <%= image_tag "backflow-lockup.png", alt: "Backflow — clean water, safe community", class: "h-10 w-auto" %>
     <% end %>
 
     <div class="hidden md:flex flex-row items-center gap-8 font-bold text-sm tracking-wider uppercase">
@@ -27,9 +27,9 @@
   </div>
 
   <div data-mobile-menu-target="menu" class="hidden md:hidden px-8 pb-4 font-bold text-sm tracking-wider uppercase">
-    <%= link_to "Home", root_path, class: "block py-2 border-b border-white/10" %>
-    <%= link_to "About", about_path, class: "block py-2 border-b border-white/10" %>
-    <%= link_to "Contact", contact_path, class: "block py-2 border-b border-white/10" %>
+    <%= link_to "Home", root_path, class: "block py-2 border-b border-line" %>
+    <%= link_to "About", about_path, class: "block py-2 border-b border-line" %>
+    <%= link_to "Contact", contact_path, class: "block py-2 border-b border-line" %>
 
     <div class="mt-4">
       <%= render "layouts/partials/login_menu" %>
