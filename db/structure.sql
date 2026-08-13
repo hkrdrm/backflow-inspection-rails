@@ -100,6 +100,8 @@ CREATE TABLE public.accounts (
     password_hash text,
     tenant_id bigint,
     super_admin boolean DEFAULT false NOT NULL,
+    role text DEFAULT 'admin'::text NOT NULL,
+    CONSTRAINT accounts_role_valid CHECK ((role = ANY (ARRAY['admin'::text, 'plumber'::text]))),
     CONSTRAINT valid_email CHECK ((email OPERATOR(public.~) '^[^,;@ \r\n]+@[^,@; \r\n]+\.[^,@; \r\n]+$'::public.citext))
 );
 
@@ -287,3 +289,4 @@ INSERT INTO "schema_migrations" ("filename") VALUES ('20250513161713_create_roda
 INSERT INTO "schema_migrations" ("filename") VALUES ('20260812222010_create_companies.rb');
 INSERT INTO "schema_migrations" ("filename") VALUES ('20260813093655_add_super_admin_to_accounts.rb');
 INSERT INTO "schema_migrations" ("filename") VALUES ('20260813171300_rename_companies_to_tenants.rb');
+INSERT INTO "schema_migrations" ("filename") VALUES ('20260813171956_add_role_to_accounts.rb');
