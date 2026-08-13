@@ -52,4 +52,62 @@ class PlumbersTest < ActionDispatch::IntegrationTest
 
     assert_response :not_found
   end
+
+  test "staff create a plumber in their own tenant" do
+    tenant = setup_tenant(slug: "mccomb", name: "City of McComb")
+    sign_in create_account(email: "staff@example.com", tenant_id: tenant.id)
+
+    assert_difference -> { Plumber.count }, 1 do
+      post "/plumbers", params: {
+        plumber: { name: "Dale Pike", company_name: "Pike Plumbing Co.", cert_number: "MS-1001" }
+      }
+    end
+
+    assert_redirected_to "/plumbers"
+    assert_equal tenant.id, Plumber.first(cert_number: "MS-1001").tenant_id
+  end
+
+  test "a plumber cannot be created into another tenant" do
+    mine = setup_tenant(slug: "mccomb", name: "City of McComb")
+    theirs = setup_tenant(slug: "summit", name: "City of Summit")
+    sign_in create_account(email: "staff@example.com", tenant_id: mine.id)
+
+    post "/plumbers", params: {
+      plumber: { name: "Dale Pike", cert_number: "MS-1001", tenant_id: theirs.id }
+    }
+
+    assert_equal mine.id, Plumber.first(cert_number: "MS-1001").tenant_id
+  end
+
+  test "a plumber with no name is rejected" do
+    tenant = setup_tenant(slug: "mccomb", name: "City of McComb")
+    sign_in create_account(email: "staff@example.com", tenant_id: tenant.id)
+
+    assert_no_difference -> { Plumber.count } do
+      post "/plumbers", params: { plumber: { name: "", cert_number: "MS-1001" } }
+    end
+
+    assert_response 422
+  end
+
+  test "staff update a plumber in their own tenant" do
+    tenant = setup_tenant(slug: "mccomb", name: "City of McComb")
+    plumber = Plumber.create(tenant_id: tenant.id, name: "Dale Pike", cert_number: "MS-1001")
+    sign_in create_account(email: "staff@example.com", tenant_id: tenant.id)
+
+    patch "/plumbers/#{plumber.id}", params: { plumber: { cert_status: "verified" } }
+
+    assert_equal "verified", plumber.reload.cert_status
+  end
+
+  test "another tenant's plumber cannot be edited" do
+    mine = setup_tenant(slug: "mccomb", name: "City of McComb")
+    theirs = setup_tenant(slug: "summit", name: "City of Summit")
+    plumber = Plumber.create(tenant_id: theirs.id, name: "Not Mine", cert_number: "MS-2002")
+    sign_in create_account(email: "staff@example.com", tenant_id: mine.id)
+
+    get "/plumbers/#{plumber.id}/edit"
+
+    assert_response :not_found
+  end
 end

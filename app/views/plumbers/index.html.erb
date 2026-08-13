@@ -6,6 +6,12 @@
       <h1 class="text-2xl font-bold text-navy">Plumbers</h1>
       <p class="mt-1 text-sm text-muted">Certified testers approved by <%= current_tenant.name %>.</p>
     </div>
+
+    <%= link_to new_plumber_path,
+          class: "inline-flex shrink-0 items-center gap-2 rounded-xl bg-brand px-5 py-3 text-sm font-bold text-white shadow-sm hover:bg-brand-dark" do %>
+      <%= render "shared/icon", name: :plus, class: "size-5" %>
+      New plumber
+    <% end %>
   </div>
 
   <div class="rounded-2xl border border-line bg-white">
@@ -21,6 +27,7 @@
               <th class="px-5 py-3 font-semibold">Cert number</th>
               <th class="px-5 py-3 font-semibold">Certification</th>
               <th class="px-5 py-3 font-semibold">Status</th>
+              <th class="px-5 py-3"><span class="sr-only">Actions</span></th>
             </tr>
           </thead>
           <tbody>
@@ -43,6 +50,12 @@
                 </td>
                 <td class="px-5 py-4">
                   <%= plumber.active? ? "Active" : "Inactive" %>
+                </td>
+                <td class="px-5 py-4">
+                  <div class="flex items-center justify-end">
+                    <%= link_to "Edit", edit_plumber_path(plumber),
+                          class: "rounded-lg px-3 py-1.5 text-sm font-semibold text-brand hover:bg-tint" %>
+                  </div>
                 </td>
               </tr>
             <% end %>
