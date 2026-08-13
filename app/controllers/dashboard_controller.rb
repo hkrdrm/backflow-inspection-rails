@@ -1,7 +1,5 @@
 class DashboardController < ApplicationController
-  layout "app"
-
-  before_action :authenticate
+  include TenantScoped
 
   # ---------------------------------------------------------------------------
   # SKETCH DATA

@@ -49,4 +49,22 @@ class SuperAdminAccessTest < ActionDispatch::IntegrationTest
 
     assert_response :success
   end
+
+  test "the sidebar offers a super admin no tenant-only links" do
+    sign_in create_account(email: "boss@example.com", super_admin: true)
+
+    get "/super-admin/tenants"
+
+    assert_response :success
+    assert_select "a[href=?]", "/plumbers", count: 0
+    assert_select "a[href=?]", "/dashboard", count: 0
+  end
+
+  test "a non-numeric tenant id is not found rather than an error" do
+    sign_in create_account(email: "boss@example.com", super_admin: true)
+
+    get "/super-admin/tenants/abc/edit"
+
+    assert_response :not_found
+  end
 end

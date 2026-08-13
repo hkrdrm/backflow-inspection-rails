@@ -48,8 +48,11 @@ module SuperAdmin
 
     private
 
+    # Looked up by id, so to_i keeps a non-numeric id (e.g.
+    # /super-admin/tenants/abc/edit) a 404 rather than a
+    # PG::InvalidTextRepresentation 500.
     def set_tenant
-      @tenant = Tenant[params[:id]]
+      @tenant = Tenant[params[:id].to_i]
 
       render_not_found unless @tenant
     end
