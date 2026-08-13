@@ -39,4 +39,14 @@ class SuperAdminAccessTest < ActionDispatch::IntegrationTest
 
     assert_response :success
   end
+
+  test "super admin reaches the back-office with no tenant" do
+    account = create_account(email: "boss@example.com", super_admin: true)
+    assert_nil account.tenant_id
+
+    sign_in account
+    get "/super-admin/tenants"
+
+    assert_response :success
+  end
 end

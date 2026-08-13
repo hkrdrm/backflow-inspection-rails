@@ -14,6 +14,8 @@ Rails.application.routes.draw do
 
   get "dashboard" => "dashboard#show", as: :dashboard
 
+  resources :plumbers, only: [ :index ]
+
   namespace :super_admin, path: "super-admin" do
     resources :tenants, only: [ :index, :new, :create, :edit, :update ] do
       member do

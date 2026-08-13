@@ -14,11 +14,5 @@ module SuperAdmin
     def require_super_admin
       render_not_found unless current_account&.super_admin?
     end
-
-    def render_not_found
-      render html: Rails.public_path.join("404.html").read.html_safe,
-             status: :not_found,
-             layout: false
-    end
   end
 end

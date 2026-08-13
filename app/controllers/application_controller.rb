@@ -15,9 +15,21 @@ class ApplicationController < ActionController::Base
     rodauth.rails_account
   end
 
+  def current_tenant
+    @current_tenant ||= current_account&.tenant
+  end
+
   def authenticate
     rodauth.require_account
   end
 
-  helper_method :current_account
+  # Renders 404 rather than 403 so the existence of a resource or area is not
+  # confirmed to anyone probing for it.
+  def render_not_found
+    render html: Rails.public_path.join("404.html").read.html_safe,
+           status: :not_found,
+           layout: false
+  end
+
+  helper_method :current_account, :current_tenant
 end
