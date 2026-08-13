@@ -2,7 +2,7 @@ require "test_helper"
 
 class SuperAdminAccessTest < ActionDispatch::IntegrationTest
   test "anonymous visitor is sent to login" do
-    get "/super-admin/companies"
+    get "/super-admin/tenants"
 
     assert_redirected_to "/login"
   end
@@ -10,7 +10,7 @@ class SuperAdminAccessTest < ActionDispatch::IntegrationTest
   test "logged in account without the flag is not told the area exists" do
     sign_in create_account(email: "regular@example.com")
 
-    get "/super-admin/companies"
+    get "/super-admin/tenants"
 
     assert_response :not_found
   end
@@ -35,7 +35,7 @@ class SuperAdminAccessTest < ActionDispatch::IntegrationTest
   test "super admin reaches the dashboard" do
     sign_in create_account(email: "boss@example.com", super_admin: true)
 
-    get "/super-admin/companies"
+    get "/super-admin/tenants"
 
     assert_response :success
   end

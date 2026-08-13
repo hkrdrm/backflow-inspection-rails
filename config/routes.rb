@@ -15,14 +15,14 @@ Rails.application.routes.draw do
   get "dashboard" => "dashboard#show", as: :dashboard
 
   namespace :super_admin, path: "super-admin" do
-    resources :companies, only: [ :index, :new, :create, :edit, :update ] do
+    resources :tenants, only: [ :index, :new, :create, :edit, :update ] do
       member do
         patch :activate
         patch :deactivate
       end
     end
 
-    root to: "companies#index"
+    root to: "tenants#index"
   end
 
   get "about"   => "home#about",   as: :about

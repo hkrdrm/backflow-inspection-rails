@@ -1,4 +1,4 @@
-class Company < Sequel::Model
+class Tenant < Sequel::Model
   plugin :validation_helpers
   plugin :boolean_readers
   # Gives Sequel models the naming/to_key interface form_with needs.

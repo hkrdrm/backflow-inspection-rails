@@ -34,13 +34,13 @@ extension and partial indexes — so `db/schema.rb` is not used.
 
 ## Multi-tenancy
 
-`companies` is the tenant table. `accounts.company_id` links an account to its
-company; it is nullable while the signup flow does not yet assign one.
+`tenants` is the tenant table. `accounts.tenant_id` links an account to its
+tenant; it is nullable while the signup flow does not yet assign one.
 
 ## Super admin
 
 A super admin is the **platform operator** — above all tenants, with access to
-the back-office at `/super-admin` for managing companies. It is a global
+the back-office at `/super-admin` for managing tenants. It is a global
 `super_admin` boolean on `accounts`.
 
 The flag is deliberately not settable from the web. Signup cannot reach it, no

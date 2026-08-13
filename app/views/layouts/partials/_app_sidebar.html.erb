@@ -1,7 +1,7 @@
 <%#
   Sidebar for the signed-in app shell.
 
-  Only Dashboard and (for super admins) Companies have routes today. The rest
+  Only Dashboard and (for super admins) Tenants have routes today. The rest
   of the mockup's nav is rendered as inert items rather than links to nowhere,
   so the shape of the product is visible without pretending the pages exist.
 %>
@@ -54,7 +54,7 @@
           <%= link_to super_admin_root_path,
                 class: "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition #{current_page?(super_admin_root_path) ? 'bg-brand text-white shadow-sm' : 'hover:bg-white/10 hover:text-white'}" do %>
             <%= render "shared/icon", name: :shield, class: "size-5 shrink-0" %>
-            Companies
+            Tenants
           <% end %>
         </li>
       <% end %>

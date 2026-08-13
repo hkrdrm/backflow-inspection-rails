@@ -1,9 +1,9 @@
-<%= form_with model: company, url: url, method: method,
+<%= form_with model: tenant, url: url, method: method,
       class: "mt-6 max-w-xl rounded-2xl border border-line bg-white p-6" do |f| %>
-  <% if company.errors.any? %>
+  <% if tenant.errors.any? %>
     <div class="mb-4 rounded-xl border border-danger/30 bg-danger/10 p-4 text-sm font-semibold text-danger">
       <ul class="list-disc pl-4">
-        <% company.errors.each do |field, messages| %>
+        <% tenant.errors.each do |field, messages| %>
           <% Array(messages).each do |message| %>
             <li><%= "#{field.to_s.humanize} #{message}" %></li>
           <% end %>
@@ -24,7 +24,7 @@
   <div class="flex items-center gap-4">
     <%= f.submit submit_label,
           class: "cursor-pointer rounded-xl bg-brand px-5 py-3 text-sm font-bold text-white shadow-sm hover:bg-brand-dark" %>
-    <%= link_to "Cancel", super_admin_companies_path,
+    <%= link_to "Cancel", super_admin_tenants_path,
           class: "text-sm font-semibold text-muted hover:text-navy" %>
   </div>
 <% end %>

@@ -33,13 +33,13 @@ module ActiveSupport
     TEST_PASSWORD = "correct horse battery"
 
     # Creates a verified account that can log in through Rodauth.
-    def create_account(email:, super_admin: false, company_id: nil)
+    def create_account(email:, super_admin: false, tenant_id: nil)
       Account.create(
         email: email,
         status: 2,
         password_hash: BCrypt::Password.create(TEST_PASSWORD, cost: BCrypt::Engine::MIN_COST),
         super_admin: super_admin,
-        company_id: company_id
+        tenant_id: tenant_id
       )
     end
   end

@@ -6,4 +6,11 @@ class AccountTest < ActiveSupport::TestCase
 
     assert_equal false, account.super_admin?
   end
+
+  test "an account belongs to a tenant" do
+    tenant = Tenant.create(name: "City of McComb", slug: "mccomb")
+    account = create_account(email: "staff@example.com", tenant_id: tenant.id)
+
+    assert_equal "City of McComb", account.reload.tenant.name
+  end
 end
