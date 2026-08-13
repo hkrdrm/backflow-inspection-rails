@@ -1,21 +1,19 @@
 <nav class="bg-ink text-white border-b-4 border-brand-green" data-controller="mobile-menu" data-action="turbo:load->mobile-menu#close">
   <div class="flex flex-row items-center justify-between gap-6 px-8 py-3 max-w-7xl mx-auto">
     <%= link_to root_path, class: "font-display text-2xl md:text-3xl tracking-wide flex items-center shrink-0" do %>
-      <span class="text-brand-green">BIT</span><span class="inline-block w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-brand-orange mx-1"></span><span>SPACE</span>
+      <span class="text-brand-green">YOUR</span><span class="inline-block w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-brand-orange mx-1"></span><span>APP</span>
     <% end %>
 
     <div class="hidden md:flex flex-row items-center gap-8 font-bold text-sm tracking-wider uppercase">
-      <span>Services</span>
-      <span>Store</span>
-      <span><%= link_to "Portfolio", "https://my-portfolio-sooty-one-83.vercel.app/" %></span>
-      <span>About</span>
-      <span><%= link_to "Contact", contact_path %></span>
+      <%= link_to "Home", root_path %>
+      <%= link_to "About", about_path %>
+      <%= link_to "Contact", contact_path %>
     </div>
 
     <div class="flex items-center gap-4">
-      <%= link_to "#", class: "hidden md:inline-flex shrink-0 items-center gap-2 bg-brand-green hover:bg-brand-green-dark text-white font-bold text-sm tracking-wide uppercase px-4 py-2 rounded" do %>
-        Get a Quote <span aria-hidden="true">&rarr;</span>
-      <% end %>
+      <div class="hidden md:block">
+        <%= render "layouts/partials/login_menu" %>
+      </div>
 
       <button type="button" class="md:hidden shrink-0 p-2 -mr-2" data-action="click->mobile-menu#toggle" aria-label="Toggle menu" aria-expanded="false">
         <svg data-mobile-menu-target="openIcon" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -29,14 +27,12 @@
   </div>
 
   <div data-mobile-menu-target="menu" class="hidden md:hidden px-8 pb-4 font-bold text-sm tracking-wider uppercase">
-    <span class="block py-2 border-b border-white/10">Services</span>
-    <span class="block py-2 border-b border-white/10">Store</span>
-    <span class="block py-2 border-b border-white/10"><%= link_to "Portfolio", "https://my-portfolio-sooty-one-83.vercel.app/" %></span>
-    <span class="block py-2 border-b border-white/10">About</span>
-    <span class="block py-2 border-b border-white/10"><%= link_to "Contact", contact_path %></span>
+    <%= link_to "Home", root_path, class: "block py-2 border-b border-white/10" %>
+    <%= link_to "About", about_path, class: "block py-2 border-b border-white/10" %>
+    <%= link_to "Contact", contact_path, class: "block py-2 border-b border-white/10" %>
 
-    <%= link_to "#", class: "mt-4 inline-flex items-center justify-center gap-2 bg-brand-green hover:bg-brand-green-dark text-white font-bold text-sm tracking-wide uppercase px-4 py-2 rounded" do %>
-      Get a Quote <span aria-hidden="true">&rarr;</span>
-    <% end %>
+    <div class="mt-4">
+      <%= render "layouts/partials/login_menu" %>
+    </div>
   </div>
 </nav>
