@@ -130,18 +130,18 @@ in the UI deletes either.
 `ImpersonationSession` and `ImpersonationEvent`, Sequel models with the
 associations implied above.
 
-`Account` gains one method:
+`Account` needs no new password method: the `Rodauth::Rails.model` mixin it
+already includes supplies `Account#password=`, which writes a
+Rodauth-compatible bcrypt hash into `password_hash` in memory, to be persisted
+by the following `save`. Hashing therefore goes through Rodauth rather than raw
+BCrypt, and cost and configuration cannot drift from what Rodauth itself writes
+on signup or password reset.
 
-```ruby
-def set_password(plain)
-  self.password_hash = RodauthApp.rodauth.allocate.password_hash(plain)
-end
-```
-
-Hashing goes through Rodauth rather than raw BCrypt so cost and configuration
-cannot drift from what Rodauth itself writes on signup or password reset. This
-is the same call `test/fixtures/accounts.yml` already uses, and it is the only
-place in the application that knows how a password hash is made.
+`Account` does gain validations — presence of email, role within
+`admin`/`plumber`, and uniqueness of email among open accounts, matching the
+partial unique index — plus the `active_model` and `defaults_setter` plugins
+that `form_with` and the column defaults require. Rodauth creates accounts
+through datasets rather than this model, so none of this touches public signup.
 
 ### 3. Accounts management
 
@@ -269,9 +269,14 @@ Impersonation:
 - Impersonating yourself, or another super admin, is refused.
 - Impersonating a closed account is permitted.
 - Logging out while impersonating closes the open session row.
-- A session key pointing at a removed account falls back to the real account.
 
-Model test: `Account#set_password` writes a hash Rodauth accepts at login.
+Falling back to the real account when the session key points at a removed
+account stays as defensive code but is not tested: the foreign key from
+`impersonation_sessions` makes an impersonated account undeletable, and this
+app deletes no accounts at all, so the state is unreachable.
+
+Model test: `ImpersonationSession` records both parties and reports `live?`
+until it is ended.
 
 ## Out of scope
 
