@@ -1,0 +1,9 @@
+<% @page_title = "Edit #{@account.email}" %>
+
+<div class="mx-auto max-w-5xl px-4 py-10">
+  <h1 class="text-2xl font-bold tracking-wide uppercase">Edit <%= @account.email %></h1>
+
+  <%= render "form", account: @account, url: super_admin_account_path(@account),
+        method: :patch, submit_label: "Save changes",
+        password_hint: "Leave blank to keep the current password." %>
+</div>

@@ -148,4 +148,98 @@ class SuperAdminAccountsTest < ActionDispatch::IntegrationTest
     refute_includes SuperAdmin::AccountsController::PERMITTED_PARAMS, :status
     refute_includes SuperAdmin::AccountsController::PERMITTED_PARAMS, :super_admin
   end
+
+  test "renders the edit form for an existing account" do
+    account = create_account(email: "edit@acme.test", tenant_id: @tenant.id)
+    sign_in @boss
+
+    get "/super-admin/accounts/#{account.id}/edit"
+
+    assert_response :success
+  end
+
+  test "returns 404 for an account that does not exist" do
+    sign_in @boss
+
+    get "/super-admin/accounts/999999/edit"
+
+    assert_response :not_found
+  end
+
+  test "a non-numeric account id is not found rather than an error" do
+    sign_in @boss
+
+    get "/super-admin/accounts/abc/edit"
+
+    assert_response :not_found
+  end
+
+  test "updates tenant and role" do
+    account = create_account(email: "edit@acme.test")
+    sign_in @boss
+
+    patch "/super-admin/accounts/#{account.id}", params: {
+      account: { email: "edit@acme.test", tenant_id: @tenant.id, role: "plumber" }
+    }
+
+    assert_redirected_to "/super-admin/accounts"
+    assert_equal @tenant.id, account.reload.tenant_id
+    assert_equal "plumber", account.role
+  end
+
+  test "a blank password leaves the existing hash untouched" do
+    account = create_account(email: "edit@acme.test", tenant_id: @tenant.id)
+    before = account.password_hash
+    sign_in @boss
+
+    patch "/super-admin/accounts/#{account.id}", params: {
+      account: { email: "edit@acme.test", tenant_id: @tenant.id, role: "admin", password: "" }
+    }
+
+    assert_equal before, account.reload.password_hash
+  end
+
+  test "a supplied password replaces the old one" do
+    account = create_account(email: "edit@acme.test", tenant_id: @tenant.id)
+    before = account.password_hash
+    sign_in @boss
+
+    patch "/super-admin/accounts/#{account.id}", params: {
+      account: { email: "edit@acme.test", tenant_id: @tenant.id, role: "admin",
+                 password: "a whole new password" }
+    }
+
+    assert_not_equal before, account.reload.password_hash
+
+    post "/logout"
+    post "/login", params: { "email" => "edit@acme.test", "password" => "a whole new password" }
+    get "/super-admin/accounts"
+    assert_response :not_found
+  end
+
+  test "a too-short password on update changes nothing" do
+    account = create_account(email: "edit@acme.test", tenant_id: @tenant.id)
+    before = account.password_hash
+    sign_in @boss
+
+    patch "/super-admin/accounts/#{account.id}", params: {
+      account: { email: "edit@acme.test", tenant_id: @tenant.id, role: "admin", password: "sevench" }
+    }
+
+    assert_response 422
+    assert_equal before, account.reload.password_hash
+  end
+
+  test "ignores super_admin and status injected into update params" do
+    account = create_account(email: "edit@acme.test", tenant_id: @tenant.id)
+    sign_in @boss
+
+    patch "/super-admin/accounts/#{account.id}", params: {
+      account: { email: "edit@acme.test", tenant_id: @tenant.id, role: "admin",
+                 super_admin: true, status: 3 }
+    }
+
+    assert_equal false, account.reload.super_admin?
+    assert_equal :verified, account.status
+  end
 end

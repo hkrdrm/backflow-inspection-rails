@@ -23,7 +23,7 @@ Rails.application.routes.draw do
         patch :deactivate
       end
     end
-    resources :accounts, only: [ :index, :new, :create ]
+    resources :accounts, only: [ :index, :new, :create, :edit, :update ]
 
     root to: "tenants#index"
   end

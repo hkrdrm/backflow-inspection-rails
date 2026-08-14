@@ -1,5 +1,7 @@
 module SuperAdmin
   class AccountsController < BaseController
+    before_action :set_account, only: [ :edit, :update ]
+
     # Matches Rodauth's password_minimum_length in app/misc/rodauth_main.rb.
     PASSWORD_MINIMUM_LENGTH = 8
 
@@ -46,7 +48,40 @@ module SuperAdmin
       end
     end
 
+    def edit
+    end
+
+    def update
+      @account.set(account_params)
+
+      password = params[:account][:password].to_s
+
+      if password.present?
+        if password.length < PASSWORD_MINIMUM_LENGTH
+          @account.errors.add(:password, "must be at least #{PASSWORD_MINIMUM_LENGTH} characters")
+          return render :edit, status: :unprocessable_entity
+        end
+
+        @account.password = password
+      end
+
+      if @account.save(raise_on_failure: false)
+        redirect_to super_admin_accounts_path, notice: "#{@account.email} updated."
+      else
+        render :edit, status: :unprocessable_entity
+      end
+    end
+
     private
+
+    # Looked up by id, so to_i keeps a non-numeric id (e.g.
+    # /super-admin/accounts/abc/edit) a 404 rather than a
+    # PG::InvalidTextRepresentation 500.
+    def set_account
+      @account = Account[params[:id].to_i]
+
+      render_not_found unless @account
+    end
 
     def filtered_accounts
       scope = Account.dataset
