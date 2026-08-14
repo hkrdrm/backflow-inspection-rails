@@ -1,0 +1,82 @@
+<% @page_title = "Accounts" %>
+
+<div class="mx-auto max-w-7xl space-y-6">
+  <div>
+    <h1 class="text-2xl font-bold text-navy">Accounts</h1>
+    <p class="mt-1 text-sm text-muted">Every account on the platform.</p>
+  </div>
+
+  <%= form_with url: super_admin_accounts_path, method: :get,
+        class: "flex flex-wrap items-end gap-3 rounded-2xl border border-line bg-white p-4" do |f| %>
+    <div>
+      <%= f.label :q, "Email", class: "block text-sm font-semibold text-navy" %>
+      <%= f.text_field :q, value: params[:q],
+            class: "mt-1 rounded-xl border border-line px-3 py-2 focus:border-brand focus:outline-none" %>
+    </div>
+
+    <div>
+      <%= f.label :tenant_id, "Tenant", class: "block text-sm font-semibold text-navy" %>
+      <%= f.select :tenant_id,
+            options_for_select(@tenant_names.map { |id, name| [ name, id ] }, params[:tenant_id]),
+            { include_blank: "All tenants" },
+            class: "mt-1 rounded-xl border border-line px-3 py-2 focus:border-brand focus:outline-none" %>
+    </div>
+
+    <%= f.submit "Filter",
+          class: "cursor-pointer rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-brand-dark" %>
+    <%= link_to "Clear", super_admin_accounts_path,
+          class: "text-sm font-semibold text-muted hover:text-navy" %>
+  <% end %>
+
+  <div class="rounded-2xl border border-line bg-white">
+    <% if @accounts.empty? %>
+      <p class="px-5 py-10 text-center text-sm text-muted">No accounts match.</p>
+    <% else %>
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[720px] text-left text-sm">
+          <thead>
+            <tr class="text-xs uppercase tracking-wide text-muted">
+              <th class="px-5 py-3 font-semibold">Email</th>
+              <th class="px-5 py-3 font-semibold">Tenant</th>
+              <th class="px-5 py-3 font-semibold">Role</th>
+              <th class="px-5 py-3 font-semibold">Status</th>
+              <th class="px-5 py-3"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @accounts.each do |account| %>
+              <tr class="border-t border-line">
+                <td class="px-5 py-4 font-semibold text-navy">
+                  <%= account.email %>
+                  <% if account.super_admin? %>
+                    <span class="ml-2 inline-flex items-center rounded-full bg-navy px-2.5 py-0.5 text-xs font-semibold text-white">
+                      Super admin
+                    </span>
+                  <% end %>
+                </td>
+                <td class="px-5 py-4 text-muted">
+                  <%= @tenant_names.fetch(account.tenant_id, "—") %>
+                </td>
+                <td class="px-5 py-4 text-navy"><%= account.role.humanize %></td>
+                <td class="px-5 py-4">
+                  <% if account.closed? %>
+                    <span class="inline-flex items-center rounded-full bg-line px-3 py-1 text-xs font-semibold text-muted">
+                      Closed
+                    </span>
+                  <% else %>
+                    <span class="inline-flex items-center rounded-full bg-ok-pale/50 px-3 py-1 text-xs font-semibold text-ok">
+                      <%= account.status.to_s.humanize %>
+                    </span>
+                  <% end %>
+                </td>
+                <td class="px-5 py-4">
+                  <div class="flex items-center justify-end gap-2"></div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </div>
+</div>

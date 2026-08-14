@@ -63,13 +63,23 @@
       <% end %>
 
       <% if current_account&.super_admin? %>
+        <% platform_items = [
+             { label: "Tenants",  icon: :shield, path: super_admin_tenants_path },
+             { label: "Accounts", icon: :user,   path: super_admin_accounts_path }
+           ] %>
         <li class="pt-2">
           <div class="px-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-sky/60">Platform</div>
-          <%= link_to super_admin_root_path,
-                class: "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition #{current_page?(super_admin_root_path) ? 'bg-brand text-white shadow-sm' : 'hover:bg-white/10 hover:text-white'}" do %>
-            <%= render "shared/icon", name: :shield, class: "size-5 shrink-0" %>
-            Tenants
-          <% end %>
+          <ul class="space-y-1">
+            <% platform_items.each do |item| %>
+              <li>
+                <%= link_to item[:path],
+                      class: "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition #{current_page?(item[:path]) ? 'bg-brand text-white shadow-sm' : 'hover:bg-white/10 hover:text-white'}" do %>
+                  <%= render "shared/icon", name: item[:icon], class: "size-5 shrink-0" %>
+                  <%= item[:label] %>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
         </li>
       <% end %>
     </ul>
