@@ -63,4 +63,79 @@ class SuperAdminAccountsTest < ActionDispatch::IntegrationTest
 
     assert_no_match "one@acme.test", response.body
   end
+
+  test "renders the new account form" do
+    sign_in @boss
+
+    get "/super-admin/accounts/new"
+
+    assert_response :success
+  end
+
+  test "creates an account that can log in with the typed password" do
+    sign_in @boss
+
+    assert_difference -> { Account.count }, 1 do
+      post "/super-admin/accounts", params: {
+        account: {
+          email: "new@acme.test", tenant_id: @tenant.id, role: "plumber",
+          password: "correct horse battery"
+        }
+      }
+    end
+
+    assert_redirected_to "/super-admin/accounts"
+    created = Account.first(email: "new@acme.test")
+    assert_equal :verified, created.status
+    assert_equal "plumber", created.role
+    assert_equal @tenant.id, created.tenant_id
+
+    post "/logout"
+    post "/login", params: { "email" => "new@acme.test", "password" => "correct horse battery" }
+
+    # Logged in as an ordinary account: the panel 404s rather than redirecting
+    # to login, which is what an anonymous request would get.
+    get "/super-admin/accounts"
+    assert_response :not_found
+  end
+
+  test "rejects a password shorter than eight characters" do
+    sign_in @boss
+
+    assert_no_difference -> { Account.count } do
+      post "/super-admin/accounts", params: {
+        account: { email: "short@acme.test", role: "admin", password: "sevench" }
+      }
+    end
+
+    assert_response 422
+  end
+
+  test "rejects an email already used by an open account" do
+    create_account(email: "taken@acme.test", tenant_id: @tenant.id)
+    sign_in @boss
+
+    assert_no_difference -> { Account.count } do
+      post "/super-admin/accounts", params: {
+        account: { email: "taken@acme.test", role: "admin", password: "correct horse battery" }
+      }
+    end
+
+    assert_response 422
+  end
+
+  test "ignores super_admin and status injected into create params" do
+    sign_in @boss
+
+    post "/super-admin/accounts", params: {
+      account: {
+        email: "sneaky@acme.test", role: "admin", password: "correct horse battery",
+        super_admin: true, status: 3
+      }
+    }
+
+    created = Account.first(email: "sneaky@acme.test")
+    assert_equal false, created.super_admin?
+    assert_equal :verified, created.status
+  end
 end
