@@ -3,6 +3,15 @@ module SuperAdmin
     # Matches Rodauth's password_minimum_length in app/misc/rodauth_main.rb.
     PASSWORD_MINIMUM_LENGTH = 8
 
+    # `super_admin` and `status` are deliberately absent: they change only
+    # through their own member actions, so privilege and lifecycle are always
+    # auditable events rather than form fields. `password` is absent because it
+    # is read directly and hashed, never assigned as a column. Named as a
+    # constant, rather than inlined in `account_params`, so a test can assert
+    # directly on the permitted set instead of relying on the `create` action's
+    # `status = :verified` override to mask an accidental widening.
+    PERMITTED_PARAMS = %i[email tenant_id role].freeze
+
     def index
       @accounts = filtered_accounts.order(:email).all
       # One lookup for the whole page rather than a query per row, matching how
@@ -52,12 +61,8 @@ module SuperAdmin
       term.to_s.gsub(/[\\%_]/) { |char| "\\#{char}" }
     end
 
-    # `super_admin` and `status` are deliberately absent: they change only
-    # through their own member actions, so privilege and lifecycle are always
-    # auditable events rather than form fields. `password` is absent because it
-    # is read directly and hashed, never assigned as a column.
     def account_params
-      params.require(:account).permit(:email, :tenant_id, :role).to_h
+      params.require(:account).permit(*PERMITTED_PARAMS).to_h
     end
 
     def tenant_options

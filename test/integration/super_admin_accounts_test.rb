@@ -138,4 +138,14 @@ class SuperAdminAccountsTest < ActionDispatch::IntegrationTest
     assert_equal false, created.super_admin?
     assert_equal :verified, created.status
   end
+
+  # The behavioral assertions above can't independently catch a permit-list
+  # regression on :status: `create` unconditionally overrides
+  # @account.status = :verified after mass-assignment, so that assertion would
+  # pass even if :status were mistakenly permitted. Assert on the permitted
+  # set directly so a future widening is caught regardless of the override.
+  test "never permits super_admin or status for mass assignment" do
+    refute_includes SuperAdmin::AccountsController::PERMITTED_PARAMS, :status
+    refute_includes SuperAdmin::AccountsController::PERMITTED_PARAMS, :super_admin
+  end
 end
