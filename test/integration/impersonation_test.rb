@@ -143,4 +143,64 @@ class ImpersonationTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match "Stop impersonating", response.body
   end
+
+  test "a write made while impersonating is recorded" do
+    sign_in @boss
+    impersonate(@target)
+
+    assert_difference -> { ImpersonationEvent.count }, 1 do
+      post "/plumbers", params: {
+        plumber: { name: "Pat Pike", cert_number: "CERT-1" }
+      }
+    end
+
+    event = ImpersonationEvent.order(:id).last
+    assert_equal ImpersonationSession.order(:id).last.id, event.impersonation_session_id
+    assert_equal "POST", event.request_method
+    assert_equal "/plumbers", event.path
+    assert_equal "plumbers#create", event.controller_action
+  end
+
+  test "a rejected write is still recorded" do
+    sign_in @boss
+    impersonate(@target)
+
+    assert_difference -> { ImpersonationEvent.count }, 1 do
+      post "/plumbers", params: { plumber: { name: "", cert_number: "" } }
+    end
+  end
+
+  test "reads are not recorded" do
+    sign_in @boss
+    impersonate(@target)
+
+    assert_no_difference -> { ImpersonationEvent.count } do
+      get "/plumbers"
+    end
+  end
+
+  test "starting an impersonation is not itself recorded as the target's write" do
+    sign_in @boss
+
+    assert_no_difference -> { ImpersonationEvent.count } do
+      impersonate(@target)
+    end
+  end
+
+  test "writes made outside an impersonation are not recorded" do
+    sign_in @boss
+
+    assert_no_difference -> { ImpersonationEvent.count } do
+      post "/super-admin/tenants", params: { tenant: { name: "Other", slug: "other" } }
+    end
+  end
+
+  test "logging out mid-impersonation closes the session" do
+    sign_in @boss
+    impersonate(@target)
+
+    post "/logout"
+
+    assert_not ImpersonationSession.order(:id).last.live?
+  end
 end

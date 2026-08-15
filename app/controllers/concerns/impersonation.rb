@@ -11,6 +11,12 @@ module Impersonation
 
   included do
     helper_method :impersonating?
+
+    # Snapshotted before the action runs so that starting an impersonation is
+    # not itself logged as something the target did — at snapshot time the
+    # operator is still themselves.
+    before_action :snapshot_impersonation
+    after_action :audit_impersonated_write
   end
 
   private
@@ -44,5 +50,21 @@ module Impersonation
   def clear_impersonation_session
     session.delete(:impersonated_account_id)
     session.delete(:impersonation_session_id)
+  end
+
+  def snapshot_impersonation
+    @impersonation_session_id = session[:impersonation_session_id]
+  end
+
+  def audit_impersonated_write
+    return if @impersonation_session_id.nil?
+    return if request.get? || request.head?
+
+    ImpersonationEvent.create(
+      impersonation_session_id: @impersonation_session_id,
+      request_method: request.request_method,
+      path: request.path,
+      controller_action: "#{controller_path}##{action_name}"
+    )
   end
 end
