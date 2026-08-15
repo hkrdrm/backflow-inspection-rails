@@ -67,6 +67,9 @@ class ImpersonationTest < ActionDispatch::IntegrationTest
     end
 
     assert_redirected_to "/super-admin/accounts"
+    # The message, not just the redirect: refusing a super admin lands in the
+    # same place, so only the alert distinguishes this guard from that one.
+    assert_equal "You cannot impersonate yourself.", flash[:alert]
   end
 
   test "impersonating another super admin is refused" do
@@ -96,6 +99,37 @@ class ImpersonationTest < ActionDispatch::IntegrationTest
     delete "/impersonation"
 
     assert_response :not_found
+  end
+
+  # Granting the impersonated account super_admin makes the panel reachable
+  # again mid-impersonation, which is the only way to reach this action twice.
+  # Without the guard the second row would name the target as the impersonator
+  # and the first row would be left live forever.
+  test "a second impersonation cannot be started from inside one" do
+    other = create_account(email: "other@acme.test", tenant_id: @tenant.id)
+    sign_in @boss
+    impersonate(@target)
+    @target.update(super_admin: true)
+
+    assert_no_difference -> { ImpersonationSession.count } do
+      impersonate(other)
+    end
+
+    assert_redirected_to "/super-admin/accounts"
+    assert_equal "Stop the current impersonation first.", flash[:alert]
+  end
+
+  # The exit must not depend on a flag another operator can revoke while the
+  # impersonation is in flight, or the banner's only button dies.
+  test "an operator whose super admin access was revoked mid-impersonation can still stop" do
+    sign_in @boss
+    impersonate(@target)
+    @boss.update(super_admin: false)
+
+    delete "/impersonation"
+
+    assert_redirected_to "/super-admin/accounts"
+    assert_not ImpersonationSession.order(:id).last.live?
   end
 
   test "impersonating an account with no active tenant lands somewhere with a way back" do

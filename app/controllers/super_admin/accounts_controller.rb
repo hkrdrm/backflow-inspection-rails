@@ -105,11 +105,17 @@ module SuperAdmin
     end
 
     def impersonate
+      # Reachable only if the impersonated account was granted super_admin
+      # mid-impersonation, which puts the panel back in reach. Starting a second
+      # impersonation from there would strand the first session live forever.
+      return refuse("Stop the current impersonation first.") if impersonating?
       return refuse("You cannot impersonate yourself.") if own_account?
       return refuse("Super admins cannot be impersonated.") if @account.super_admin?
 
       impersonation = ImpersonationSession.create(
-        impersonator_account_id: current_account.id,
+        # The real operator, never current_account: an audit table that takes
+        # its actor from the mutable view identity cannot attribute anything.
+        impersonator_account_id: true_account.id,
         impersonated_account_id: @account.id,
         tenant_id: @account.tenant_id,
         ip_address: request.remote_ip,

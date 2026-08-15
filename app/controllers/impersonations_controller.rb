@@ -6,8 +6,11 @@ class ImpersonationsController < ApplicationController
 
   def destroy
     # Authorized against the real identity, which is precisely what the
-    # session-swap design preserves.
-    return render_not_found unless true_account&.super_admin?
+    # session-swap design preserves. The session key alone is enough: only
+    # someone who passed the super admin gate to start could have set it, and
+    # the Rails session is signed, so the exit survives that flag being revoked
+    # mid-impersonation. An account that never started one has neither and 404s.
+    return render_not_found unless session[:impersonation_session_id] || true_account&.super_admin?
 
     if (id = session[:impersonation_session_id])
       ImpersonationSession.where(id: id, ended_at: nil).update(ended_at: Time.current)
