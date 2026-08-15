@@ -195,6 +195,97 @@ class ImpersonationTest < ActionDispatch::IntegrationTest
     end
   end
 
+  # Nothing in this app wraps an action in a transaction — Sequel is not
+  # Active Record and there is no per-request rollback — so a write that
+  # commits before a later line raises is a real, permanent write. No real
+  # action can stage that on demand, so the audit hole needs a controller of
+  # its own to reproduce.
+  class RaisingWriteController < ApplicationController
+    def create
+      Plumber.create(
+        tenant_id: current_account.tenant_id,
+        name: "Committed before the raise",
+        cert_number: "CERT-BOOM"
+      )
+
+      raise "the action blew up after the write landed"
+    end
+  end
+
+  # `with_routing` is the obvious tool here and the wrong one: it swaps in a
+  # fresh integration session, dropping the login and impersonation cookies the
+  # test is built on. Appending to the real route set keeps the session.
+  def with_throwaway_route(path, to:)
+    Rails.application.routes.disable_clear_and_finalize = true
+    Rails.application.routes.draw { post path => to }
+
+    yield
+  ensure
+    Rails.application.routes.disable_clear_and_finalize = false
+    Rails.application.reload_routes!
+  end
+
+  def with_raising_write_route(&block)
+    with_throwaway_route("/raising-write", to: "impersonation_test/raising_write#create", &block)
+  end
+
+  def with_halting_write_route(&block)
+    with_throwaway_route("/halting-write", to: "impersonation_test/halting_write#create", &block)
+  end
+
+  test "a write is recorded even when the action raises after persisting it" do
+    sign_in @boss
+    impersonate(@target)
+
+    with_raising_write_route do
+      assert_difference -> { ImpersonationEvent.count }, 1 do
+        assert_raises(RuntimeError) { post "/raising-write" }
+      end
+    end
+
+    assert Plumber.first(cert_number: "CERT-BOOM"), "the write should have committed"
+
+    event = ImpersonationEvent.order(:id).last
+    assert_equal ImpersonationSession.order(:id).last.id, event.impersonation_session_id
+    assert_equal "POST", event.request_method
+    assert_equal "/raising-write", event.path
+    assert_equal "impersonation_test/raising_write#create", event.controller_action
+  end
+
+  # A filter registered after the concern — every authorization check in this
+  # app is one — halts the chain by rendering, so the action never runs. The
+  # around callback has already started by then, so its ensure still fires and
+  # the attempt is recorded. That is the intended reading: a refused write is
+  # an attempted write, and an audit trail exists to show attempts.
+  class HaltingWriteController < ApplicationController
+    before_action :refuse
+
+    def create
+      raise "the halted chain should never reach the action"
+    end
+
+    private
+
+    def refuse
+      render_not_found
+    end
+  end
+
+  test "a write refused by a later filter is still recorded" do
+    sign_in @boss
+    impersonate(@target)
+
+    with_halting_write_route do
+      assert_difference -> { ImpersonationEvent.count }, 1 do
+        post "/halting-write"
+      end
+    end
+
+    assert_response :not_found
+    assert_equal "impersonation_test/halting_write#create",
+                 ImpersonationEvent.order(:id).last.controller_action
+  end
+
   test "logging out mid-impersonation closes the session" do
     sign_in @boss
     impersonate(@target)

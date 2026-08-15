@@ -16,7 +16,7 @@ module Impersonation
     # not itself logged as something the target did — at snapshot time the
     # operator is still themselves.
     before_action :snapshot_impersonation
-    after_action :audit_impersonated_write
+    around_action :audit_impersonated_write
   end
 
   private
@@ -56,7 +56,22 @@ module Impersonation
     @impersonation_session_id = session[:impersonation_session_id]
   end
 
+  # Around rather than after, because an after-type callback is skipped when the
+  # action raises. Nothing wraps a controller action in a transaction here —
+  # this app is Sequel, not Active Record — so a save that commits before a
+  # later line blows up is a permanent write, and skipping the callback would
+  # leave exactly that write untraced. The ensure deliberately does not rescue:
+  # the action's exception must still reach the error handling above.
   def audit_impersonated_write
+    yield
+  ensure
+    record_impersonated_write
+  end
+
+  # Split out of the ensure above so the guards can stay guard clauses: a bare
+  # `return` inside an ensure block discards the exception on its way past,
+  # which would turn this audit trail into an exception swallower.
+  def record_impersonated_write
     return if @impersonation_session_id.nil?
     return if request.get? || request.head?
 
