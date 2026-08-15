@@ -242,4 +242,72 @@ class SuperAdminAccountsTest < ActionDispatch::IntegrationTest
     assert_equal false, account.reload.super_admin?
     assert_equal :verified, account.status
   end
+
+  test "closing an account keeps the row and blocks login" do
+    account = create_account(email: "gone@acme.test", tenant_id: @tenant.id)
+    sign_in @boss
+
+    patch "/super-admin/accounts/#{account.id}/close"
+
+    assert_equal :closed, account.reload.status
+    assert_equal 1, Account.where(id: account.id).count
+
+    post "/logout"
+    post "/login", params: { "email" => "gone@acme.test", "password" => TEST_PASSWORD }
+
+    # Still anonymous, so a protected page redirects to login rather than 404ing.
+    get "/super-admin/accounts"
+    assert_redirected_to "/login"
+  end
+
+  test "reopening restores a closed account" do
+    account = create_account(email: "back@acme.test", tenant_id: @tenant.id)
+    account.update(status: :closed)
+    sign_in @boss
+
+    patch "/super-admin/accounts/#{account.id}/reopen"
+
+    assert_equal :verified, account.reload.status
+  end
+
+  test "reopening is refused when the email is taken by an open account" do
+    closed = create_account(email: "dup@acme.test", tenant_id: @tenant.id)
+    closed.update(status: :closed)
+    create_account(email: "dup@acme.test", tenant_id: @tenant.id)
+    sign_in @boss
+
+    patch "/super-admin/accounts/#{closed.id}/reopen"
+
+    assert_redirected_to "/super-admin/accounts"
+    assert_equal :closed, closed.reload.status
+  end
+
+  test "closing your own account is refused" do
+    sign_in @boss
+
+    patch "/super-admin/accounts/#{@boss.id}/close"
+
+    assert_redirected_to "/super-admin/accounts"
+    assert_equal :verified, @boss.reload.status
+  end
+
+  test "grants and revokes the super admin flag" do
+    account = create_account(email: "deputy@example.com")
+    sign_in @boss
+
+    patch "/super-admin/accounts/#{account.id}/grant_super_admin"
+    assert_equal true, account.reload.super_admin?
+
+    patch "/super-admin/accounts/#{account.id}/revoke_super_admin"
+    assert_equal false, account.reload.super_admin?
+  end
+
+  test "revoking your own super admin flag is refused" do
+    sign_in @boss
+
+    patch "/super-admin/accounts/#{@boss.id}/revoke_super_admin"
+
+    assert_redirected_to "/super-admin/accounts"
+    assert_equal true, @boss.reload.super_admin?
+  end
 end

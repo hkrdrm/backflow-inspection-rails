@@ -1,6 +1,7 @@
 module SuperAdmin
   class AccountsController < BaseController
-    before_action :set_account, only: [ :edit, :update ]
+    before_action :set_account,
+                  only: [ :edit, :update, :close, :reopen, :grant_super_admin, :revoke_super_admin ]
 
     # Matches Rodauth's password_minimum_length in app/misc/rodauth_main.rb.
     PASSWORD_MINIMUM_LENGTH = 8
@@ -72,6 +73,37 @@ module SuperAdmin
       end
     end
 
+    def close
+      return refuse("You cannot close your own account.") if own_account?
+
+      @account.update(status: :closed)
+      redirect_to super_admin_accounts_path, notice: "#{@account.email} closed."
+    end
+
+    def reopen
+      @account.status = :verified
+
+      if @account.save(raise_on_failure: false)
+        redirect_to super_admin_accounts_path, notice: "#{@account.email} reopened."
+      else
+        # The partial unique index only covers open accounts, so another account
+        # may have taken this email while this one was closed.
+        refuse("#{@account.email} cannot be reopened: that email belongs to an open account.")
+      end
+    end
+
+    def grant_super_admin
+      @account.update(super_admin: true)
+      redirect_to super_admin_accounts_path, notice: "#{@account.email} is now a super admin."
+    end
+
+    def revoke_super_admin
+      return refuse("You cannot revoke your own super admin access.") if own_account?
+
+      @account.update(super_admin: false)
+      redirect_to super_admin_accounts_path, notice: "#{@account.email} is no longer a super admin."
+    end
+
     private
 
     # Looked up by id, so to_i keeps a non-numeric id (e.g.
@@ -104,5 +136,15 @@ module SuperAdmin
       Tenant.order(:name).to_hash(:id, :name).map { |id, name| [ name, id ] }
     end
     helper_method :tenant_options
+
+    def own_account?
+      @account.id == current_account.id
+    end
+
+    # The account legitimately exists and is legitimately visible; the panel
+    # just will not do this. 404 stays reserved for hiding existence.
+    def refuse(message)
+      redirect_to super_admin_accounts_path, alert: message
+    end
   end
 end

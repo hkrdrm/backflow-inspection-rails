@@ -23,7 +23,14 @@ Rails.application.routes.draw do
         patch :deactivate
       end
     end
-    resources :accounts, only: [ :index, :new, :create, :edit, :update ]
+    resources :accounts, only: [ :index, :new, :create, :edit, :update ] do
+      member do
+        patch :close
+        patch :reopen
+        patch :grant_super_admin
+        patch :revoke_super_admin
+      end
+    end
 
     root to: "tenants#index"
   end

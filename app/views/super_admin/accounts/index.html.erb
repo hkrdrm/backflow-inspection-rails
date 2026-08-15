@@ -73,6 +73,28 @@
                   <div class="flex items-center justify-end gap-2">
                     <%= link_to "Edit", edit_super_admin_account_path(account),
                           class: "rounded-lg px-3 py-1.5 text-sm font-semibold text-brand hover:bg-tint" %>
+
+                    <% if account.closed? %>
+                      <%= button_to "Reopen", reopen_super_admin_account_path(account),
+                            method: :patch,
+                            class: "cursor-pointer rounded-lg px-3 py-1.5 text-sm font-semibold text-ok hover:bg-ok-pale/40" %>
+                    <% else %>
+                      <%= button_to "Close", close_super_admin_account_path(account),
+                            method: :patch,
+                            class: "cursor-pointer rounded-lg px-3 py-1.5 text-sm font-semibold text-muted hover:bg-tint hover:text-navy" %>
+                    <% end %>
+
+                    <% if account.super_admin? %>
+                      <%= button_to "Revoke admin", revoke_super_admin_super_admin_account_path(account),
+                            method: :patch,
+                            form: { data: { turbo_confirm: "Remove platform operator access from #{account.email}?" } },
+                            class: "cursor-pointer rounded-lg px-3 py-1.5 text-sm font-semibold text-danger hover:bg-danger/10" %>
+                    <% else %>
+                      <%= button_to "Make admin", grant_super_admin_super_admin_account_path(account),
+                            method: :patch,
+                            form: { data: { turbo_confirm: "Give #{account.email} full platform access?" } },
+                            class: "cursor-pointer rounded-lg px-3 py-1.5 text-sm font-semibold text-navy hover:bg-tint" %>
+                    <% end %>
                   </div>
                 </td>
               </tr>

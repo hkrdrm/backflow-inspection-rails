@@ -43,16 +43,37 @@ A super admin is the **platform operator** — above all tenants, with access to
 the back-office at `/super-admin` for managing tenants. It is a global
 `super_admin` boolean on `accounts`.
 
-The flag is deliberately not settable from the web. Signup cannot reach it, no
-permitted-params list includes it, and there is no UI to grant it. Grant it
-from the console:
+The flag is granted and revoked from **Accounts** in the back office, by an
+existing super admin. Signup cannot reach it and no permitted-params list
+includes it, so the panel is the only path. An operator cannot revoke their own
+flag, which keeps the last one from locking everybody out.
+
+Bootstrapping the first super admin still happens in the console:
 
 ```
 bin/rails console
 Account.where(email: "you@example.com").update(super_admin: true)
 ```
 
-Revoke the same way with `super_admin: false`.
-
 Accounts without the flag receive a 404 from every `/super-admin` route rather
 than a 403, so the area's existence is not confirmed to anyone probing for it.
+
+## Impersonation
+
+A super admin can impersonate any non-super-admin account from **Accounts** in
+the back office, to see and fix what that person sees.
+
+The Rodauth session keeps identifying the operator throughout — only
+`current_account` changes — so no remember-me cookie is ever written for the
+impersonated account, and stopping is always possible. The back office is
+hidden for the duration, since you are acting as a tenant user; the red banner
+at the top of every page is the way back.
+
+Every impersonation is recorded in `impersonation_sessions`, and every non-GET
+request made during one in `impersonation_events`. Both are append-only and
+have no UI; query them from the console:
+
+```
+bin/rails console
+ImpersonationSession.order(:started_at).last.impersonation_events.map(&:path)
+```

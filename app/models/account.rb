@@ -25,6 +25,10 @@ class Account < Sequel::Model
     super
     validates_presence :email
     validates_includes ROLES, :role
-    validates_unique(:email) { |ds| ds.where(status: [ 1, 2 ]) } if OPEN_STATUSES.include?(status)
+    # only_if_modified: false because reopen (Task 5) flips status without
+    # touching email, and Sequel's default only rechecks uniqueness when the
+    # checked column itself changed, which would let the DB's partial unique
+    # index raise instead of this validation catching the collision.
+    validates_unique(:email, only_if_modified: false) { |ds| ds.where(status: [ 1, 2 ]) } if OPEN_STATUSES.include?(status)
   end
 end
