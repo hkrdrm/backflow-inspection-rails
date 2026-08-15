@@ -29,11 +29,17 @@ Rails.application.routes.draw do
         patch :reopen
         patch :grant_super_admin
         patch :revoke_super_admin
+        post :impersonate
       end
     end
 
     root to: "tenants#index"
   end
+
+  # Deliberately outside the super_admin namespace: mid-impersonation
+  # current_account is the target, so a namespaced route would 404 the operator
+  # into being stuck as that user.
+  resource :impersonation, only: [ :destroy ]
 
   get "about"   => "home#about",   as: :about
   get "contact" => "home#contact", as: :contact

@@ -1,7 +1,7 @@
 module SuperAdmin
   class AccountsController < BaseController
     before_action :set_account,
-                  only: [ :edit, :update, :close, :reopen, :grant_super_admin, :revoke_super_admin ]
+                  only: [ :edit, :update, :close, :reopen, :grant_super_admin, :revoke_super_admin, :impersonate ]
 
     # Matches Rodauth's password_minimum_length in app/misc/rodauth_main.rb.
     PASSWORD_MINIMUM_LENGTH = 8
@@ -104,6 +104,25 @@ module SuperAdmin
       redirect_to super_admin_accounts_path, notice: "#{@account.email} is no longer a super admin."
     end
 
+    def impersonate
+      return refuse("You cannot impersonate yourself.") if own_account?
+      return refuse("Super admins cannot be impersonated.") if @account.super_admin?
+
+      impersonation = ImpersonationSession.create(
+        impersonator_account_id: current_account.id,
+        impersonated_account_id: @account.id,
+        tenant_id: @account.tenant_id,
+        ip_address: request.remote_ip,
+        started_at: Time.current
+      )
+
+      session[:impersonated_account_id] = @account.id
+      session[:impersonation_session_id] = impersonation.id
+
+      redirect_to impersonation_landing_path(@account),
+                  notice: "You are now impersonating #{@account.email}."
+    end
+
     private
 
     # Looked up by id, so to_i keeps a non-numeric id (e.g.
@@ -145,6 +164,12 @@ module SuperAdmin
     # just will not do this. 404 stays reserved for hiding existence.
     def refuse(message)
       redirect_to super_admin_accounts_path, alert: message
+    end
+
+    # The dashboard 404s without an active tenant, and a 404 renders without a
+    # layout — no banner, no way back. Anyone without one starts at root.
+    def impersonation_landing_path(account)
+      account.tenant&.active? ? dashboard_path : root_path
     end
   end
 end

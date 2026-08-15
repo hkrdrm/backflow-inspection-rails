@@ -7,6 +7,8 @@
   <%= render partial: "layouts/partials/navigation" %>
 
   <body class="flex flex-col bg-surface text-ink min-h-screen">
+    <%= render "layouts/partials/impersonation_banner" %>
+
     <% if notice %>
       <div class="alert alert-success"><%= notice %></div>
     <% end %>

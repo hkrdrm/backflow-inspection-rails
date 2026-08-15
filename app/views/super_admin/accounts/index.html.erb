@@ -71,6 +71,13 @@
                 </td>
                 <td class="px-5 py-4">
                   <div class="flex items-center justify-end gap-2">
+                    <% unless account.super_admin? %>
+                      <%= button_to "Impersonate", impersonate_super_admin_account_path(account),
+                            method: :post,
+                            form: { data: { turbo_confirm: "Act as #{account.email}? Everything you do will be recorded." } },
+                            class: "cursor-pointer rounded-lg px-3 py-1.5 text-sm font-semibold text-navy hover:bg-tint" %>
+                    <% end %>
+
                     <%= link_to "Edit", edit_super_admin_account_path(account),
                           class: "rounded-lg px-3 py-1.5 text-sm font-semibold text-brand hover:bg-tint" %>
 
