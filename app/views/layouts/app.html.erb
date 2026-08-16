@@ -5,6 +5,8 @@
   </head>
 
   <body class="min-h-screen bg-surface text-ink">
+    <%= render "layouts/partials/impersonation_banner" %>
+
     <div class="flex min-h-screen" data-controller="mobile-menu" data-action="turbo:load->mobile-menu#close">
       <%# Sidebar: fixed drawer on small screens, static column from lg up. %>
       <div data-mobile-menu-target="menu"

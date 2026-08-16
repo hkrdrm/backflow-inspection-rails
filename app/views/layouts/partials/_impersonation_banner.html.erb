@@ -1,0 +1,10 @@
+<% if impersonating? %>
+  <div class="flex flex-wrap items-center justify-between gap-3 bg-danger px-4 py-2 text-sm font-semibold text-white">
+    <span>
+      Impersonating <strong><%= current_account.email %></strong> — every change you make is recorded.
+    </span>
+
+    <%= button_to "Stop impersonating", impersonation_path, method: :delete,
+          class: "cursor-pointer rounded-lg bg-white/15 px-3 py-1.5 text-sm font-bold text-white hover:bg-white/25" %>
+  </div>
+<% end %>

@@ -125,6 +125,16 @@ class RodauthMain < Rodauth::Rails::Auth
     #   Profile.find_by!(account_id: account_id).destroy
     # end
 
+    # A logout mid-impersonation would otherwise strand a session row with a
+    # NULL ended_at, and "still open" would stop meaning anything.
+    before_logout do
+      if (id = session[:impersonation_session_id])
+        db[:impersonation_sessions].where(id: id, ended_at: nil).update(ended_at: Time.current)
+        session.delete(:impersonation_session_id)
+        session.delete(:impersonated_account_id)
+      end
+    end
+
     # ==> Redirects
     # Redirect to home page after logout.
     logout_redirect "/"
