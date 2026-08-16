@@ -11,8 +11,11 @@ Sequel.migration do
   # has to record to answer "who, and when" from the database alone.
   #
   # Both tables are empty and this feature has never shipped, so the USING
-  # clause has no rows to convert. It is spelled out anyway to say what the old
-  # values meant: the Ruby-written columns held UTC wall time.
+  # clauses have no rows to convert. They are spelled out anyway to record what
+  # the old values meant, and the two tables meant different things: the
+  # Ruby-written session columns held UTC wall time, while an event's created_at
+  # came from the server's own clock and so is already in its local zone, which
+  # is what a bare cast assumes.
   up do
     alter_table :impersonation_sessions do
       set_column_type :started_at, "timestamptz",
@@ -27,8 +30,7 @@ Sequel.migration do
     end
 
     alter_table :impersonation_events do
-      set_column_type :created_at, "timestamptz",
-                      using: Sequel.lit("created_at AT TIME ZONE 'UTC'")
+      set_column_type :created_at, "timestamptz"
     end
   end
 
