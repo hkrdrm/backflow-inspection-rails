@@ -50,7 +50,7 @@ CREATE TABLE public.account_login_change_keys (
     id bigint NOT NULL,
     key text NOT NULL,
     login text NOT NULL,
-    deadline timestamp without time zone NOT NULL
+    deadline timestamp with time zone NOT NULL
 );
 
 
@@ -61,8 +61,8 @@ CREATE TABLE public.account_login_change_keys (
 CREATE TABLE public.account_password_reset_keys (
     id bigint NOT NULL,
     key text NOT NULL,
-    deadline timestamp without time zone NOT NULL,
-    email_last_sent timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    deadline timestamp with time zone NOT NULL,
+    email_last_sent timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
@@ -73,7 +73,7 @@ CREATE TABLE public.account_password_reset_keys (
 CREATE TABLE public.account_remember_keys (
     id bigint NOT NULL,
     key text NOT NULL,
-    deadline timestamp without time zone NOT NULL
+    deadline timestamp with time zone NOT NULL
 );
 
 
@@ -84,8 +84,8 @@ CREATE TABLE public.account_remember_keys (
 CREATE TABLE public.account_verification_keys (
     id bigint NOT NULL,
     key text NOT NULL,
-    requested_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    email_last_sent timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    requested_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    email_last_sent timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
@@ -135,8 +135,8 @@ CREATE TABLE public.tenants (
     state text,
     postal_code text,
     active boolean DEFAULT true NOT NULL,
-    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
@@ -227,8 +227,8 @@ CREATE TABLE public.plumbers (
     cert_status text DEFAULT 'pending'::text NOT NULL,
     cert_date date,
     active boolean DEFAULT true NOT NULL,
-    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT plumbers_cert_status_valid CHECK ((cert_status = ANY (ARRAY['pending'::text, 'verified'::text, 'expired'::text, 'revoked'::text])))
 );
 
@@ -500,3 +500,4 @@ INSERT INTO "schema_migrations" ("filename") VALUES ('20260813171956_add_role_to
 INSERT INTO "schema_migrations" ("filename") VALUES ('20260813172603_create_plumbers.rb');
 INSERT INTO "schema_migrations" ("filename") VALUES ('20260814172904_create_impersonation_tables.rb');
 INSERT INTO "schema_migrations" ("filename") VALUES ('20260815203000_use_timestamptz_for_impersonation_audit.rb');
+INSERT INTO "schema_migrations" ("filename") VALUES ('20260816021500_use_timestamptz_everywhere.rb');
