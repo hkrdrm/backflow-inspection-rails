@@ -79,7 +79,13 @@ module Impersonation
       impersonation_session_id: @impersonation_session_id,
       request_method: request.request_method,
       path: request.path,
-      controller_action: "#{controller_path}##{action_name}"
+      controller_action: "#{controller_path}##{action_name}",
+      # Stamped here rather than left to the column default. CURRENT_TIMESTAMP is
+      # the transaction's start time, not the statement's, so inside a
+      # transaction it reports an instant before the session row that Ruby wrote
+      # — an event predating the session containing it. Both tables now read the
+      # same clock.
+      created_at: Time.current
     )
   end
 end

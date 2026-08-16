@@ -164,7 +164,7 @@ CREATE TABLE public.impersonation_events (
     request_method text NOT NULL,
     path text NOT NULL,
     controller_action text NOT NULL,
-    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
@@ -192,8 +192,8 @@ CREATE TABLE public.impersonation_sessions (
     impersonated_account_id bigint NOT NULL,
     tenant_id bigint,
     ip_address text,
-    started_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    ended_at timestamp without time zone
+    started_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    ended_at timestamp with time zone
 );
 
 
@@ -372,6 +372,20 @@ CREATE INDEX impersonation_sessions_impersonated_account_id_index ON public.impe
 
 
 --
+-- Name: impersonation_sessions_impersonator_account_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX impersonation_sessions_impersonator_account_id_index ON public.impersonation_sessions USING btree (impersonator_account_id);
+
+
+--
+-- Name: impersonation_sessions_tenant_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX impersonation_sessions_tenant_id_index ON public.impersonation_sessions USING btree (tenant_id);
+
+
+--
 -- Name: plumbers_account_id_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -485,3 +499,4 @@ INSERT INTO "schema_migrations" ("filename") VALUES ('20260813171300_rename_comp
 INSERT INTO "schema_migrations" ("filename") VALUES ('20260813171956_add_role_to_accounts.rb');
 INSERT INTO "schema_migrations" ("filename") VALUES ('20260813172603_create_plumbers.rb');
 INSERT INTO "schema_migrations" ("filename") VALUES ('20260814172904_create_impersonation_tables.rb');
+INSERT INTO "schema_migrations" ("filename") VALUES ('20260815203000_use_timestamptz_for_impersonation_audit.rb');

@@ -83,6 +83,28 @@ class ImpersonationTest < ActionDispatch::IntegrationTest
     assert_redirected_to "/super-admin/accounts"
   end
 
+  # The headline use case: an operator impersonates precisely because the person
+  # cannot log in themselves. A status guard added to #impersonate in good faith
+  # would delete the feature's reason for existing, so both halves are pinned —
+  # the start succeeds, and the identity survives into the next request, where
+  # Rodauth's own status checks would otherwise reject it.
+  test "impersonating a closed account is permitted" do
+    closed = create_account(email: "closed@acme.test", tenant_id: @tenant.id)
+    closed.update(status: :closed)
+    sign_in @boss
+
+    assert_difference -> { ImpersonationSession.count }, 1 do
+      impersonate(closed)
+    end
+
+    assert_redirected_to "/dashboard"
+
+    get "/dashboard"
+    assert_response :success
+    assert_match "closed@acme.test", response.body
+    assert_match "Stop impersonating", response.body
+  end
+
   test "an ordinary account cannot start an impersonation" do
     sign_in create_account(email: "regular@acme.test", tenant_id: @tenant.id)
 
@@ -159,6 +181,44 @@ class ImpersonationTest < ActionDispatch::IntegrationTest
     assert_equal "POST", event.request_method
     assert_equal "/plumbers", event.path
     assert_equal "plumbers#create", event.controller_action
+  end
+
+  # The trail exists to answer "who, and when", so both halves of "when" are
+  # pinned here.
+  #
+  # Absolute: a `timestamp without time zone` column silently discards the
+  # offset Ruby sends, so on a server that is not UTC every row landed hours
+  # from the instant it recorded. The bookends catch that; nothing else in the
+  # suite would, since a uniformly shifted trail is internally consistent.
+  #
+  # Relative: the two tables are filled by different statements, and while the
+  # event fell through to the column default they read different clocks —
+  # CURRENT_TIMESTAMP is the transaction's start, not the statement's, which put
+  # events before the session containing them.
+  test "the trail records the instants a write actually happened" do
+    sign_in @boss
+
+    before = Time.current
+    impersonate(@target)
+    after = Time.current
+
+    post "/plumbers", params: {
+      plumber: { name: "Pat Pike", cert_number: "CERT-1" }
+    }
+    # Captured before stopping: the DELETE is itself an audited write, and its
+    # own event is stamped just after ended_at, so the last row is the boundary
+    # rather than the write this test is about.
+    event = ImpersonationEvent.order(:id).last
+    delete "/impersonation"
+
+    session = ImpersonationSession.order(:id).last
+
+    assert_operator session.started_at, :>=, before
+    assert_operator session.started_at, :<=, after
+
+    assert_equal "plumbers#create", event.controller_action
+    assert_operator event.created_at, :>=, session.started_at
+    assert_operator event.created_at, :<=, session.ended_at
   end
 
   test "a rejected write is still recorded" do
