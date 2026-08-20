@@ -70,7 +70,7 @@ group :test do
   gem "selenium-webdriver"
 end
 
-gem "rodauth-rails", "~> 2.1"
+gem "rodauth-rails", "~> 2.2"
 # Used by Rodauth for password hashing
 gem "bcrypt", "~> 3.1", require: false
 # Used by Rodauth for rendering built-in view and email templates
