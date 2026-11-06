@@ -51,4 +51,78 @@ class DashboardTest < ActionDispatch::IntegrationTest
 
     assert_response :not_found
   end
+
+  # --- Modules --------------------------------------------------------------
+
+  def sign_in_to_summit
+    tenant = Tenant.create(name: "City of Summit", slug: "summit")
+    sign_in create_account(email: "owner@example.com", tenant_id: tenant.id)
+    tenant
+  end
+
+  test "dashboard names the tenant" do
+    sign_in_to_summit
+
+    get "/dashboard"
+
+    assert_select "h1", /City of Summit/
+  end
+
+  test "a tenant with backflow gets a card linking to it" do
+    sign_in_to_summit.enable_module!(:backflow, by: nil)
+
+    get "/dashboard"
+
+    assert_select "main a[href=?]", "/backflow"
+    assert_match "Backflow Inspections", response.body
+  end
+
+  test "a tenant with no modules sees the empty state" do
+    sign_in_to_summit
+
+    get "/dashboard"
+
+    assert_match "No modules are set up for your organization yet", response.body
+  end
+
+  test "the core dashboard carries no backflow content" do
+    sign_in_to_summit.enable_module!(:backflow, by: nil)
+
+    get "/dashboard"
+
+    assert_no_match "Upcoming Inspections", response.body
+  end
+
+  # Scoped to the sidebar's <aside> so the dashboard card's own link to
+  # /backflow is not counted.
+  test "the sidebar shows Inspections only with the module" do
+    tenant = sign_in_to_summit
+
+    get "/dashboard"
+    assert_select "aside a[href=?]", "/backflow", count: 0
+
+    tenant.enable_module!(:backflow, by: nil)
+    get "/dashboard"
+    assert_select "aside a[href=?]", "/backflow", text: /Inspections/, count: 1
+  end
+
+  test "a retired module row does not break the dashboard" do
+    tenant = sign_in_to_summit
+    TenantModule.dataset.insert(tenant_id: tenant.id, module_key: "retired", enabled_at: Time.current)
+
+    get "/dashboard"
+
+    assert_response :success
+    assert_match "No modules are set up for your organization yet", response.body
+  end
+
+  test "the sidebar no longer lists placeholder backflow items" do
+    sign_in_to_summit
+
+    get "/dashboard"
+
+    %w[Customers Appliances Inspections Reports].each do |label|
+      assert_select "aside", text: /#{label}/, count: 0
+    end
+  end
 end

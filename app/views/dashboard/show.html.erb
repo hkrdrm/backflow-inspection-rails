@@ -1,3 +1,29 @@
 <% @page_title = "Dashboard" %>
+<%# Core landing page for every tenant, whatever modules it has. It holds no
+    module content of its own: each module's home page is linked from here. %>
+<% modules = current_tenant.enabled_modules %>
 
-<h1>Welcome back</h1>
+<div class="mx-auto max-w-7xl space-y-6">
+  <div>
+    <h1 class="text-2xl font-bold text-navy">
+      Welcome back, <%= current_tenant.name %>.
+    </h1>
+    <p class="mt-1 text-sm text-muted">Signed in as <%= current_account.email %>.</p>
+  </div>
+
+  <% if modules.empty? %>
+    <div class="rounded-2xl border border-line bg-white px-5 py-10 text-center text-sm text-muted">
+      No modules are set up for your organization yet. Contact support to get started.
+    </div>
+  <% else %>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <% modules.each do |definition| %>
+        <%= link_to public_send(definition.home_path),
+              class: "block rounded-2xl border border-line bg-white p-5 transition hover:border-brand hover:shadow-sm" do %>
+          <div class="text-base font-bold text-navy"><%= definition.name %></div>
+          <p class="mt-1 text-sm text-muted"><%= definition.description %></p>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

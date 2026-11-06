@@ -1,21 +1,21 @@
 <%#
   Sidebar for the signed-in app shell.
 
-  Only Dashboard and (for super admins) Tenants have routes today. The rest
-  of the mockup's nav is rendered as inert items rather than links to nowhere,
-  so the shape of the product is visible without pretending the pages exist.
+  Core items appear for every tenant. Each module the tenant has then adds its
+  own items, declared in TenantModules::Registry, so a tenant only sees links
+  to modules it can use. Items without a path render as inert entries rather
+  than links to nowhere.
 %>
-<%# Nav follows the workflow diagram's views rather than the visual mockup's
-    placeholder list: Customers, Appliances, Inspections, Plumbers, Reports. %>
 <% nav_items = [
      { label: "Dashboard", icon: :home, path: dashboard_path },
-     { label: "Customers", icon: :building },
-     { label: "Appliances", icon: :droplet },
-     { label: "Inspections", icon: :calendar },
      { label: "Plumbers", icon: :user, path: plumbers_path },
-     { label: "Reports", icon: :document },
      { label: "Settings", icon: :gear }
    ] %>
+<% if current_tenant %>
+  <% nav_items += current_tenant.enabled_modules.flat_map(&:nav_items).map do |item|
+       item.merge(path: public_send(item[:path]))
+     end %>
+<% end %>
 <%# The logo always needs somewhere safe to go: a tenant lands on their own
     dashboard, a super admin with no tenant lands in the back office, and a
     super admin who somehow has neither gets no link rather than a 404. %>
