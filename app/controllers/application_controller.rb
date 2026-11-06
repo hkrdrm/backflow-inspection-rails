@@ -6,7 +6,7 @@ class ApplicationController < ActionController::Base
 
   private
   def current_session
-		User::Session.find
+    User::Session.find
   end
 
   def current_user
