@@ -54,8 +54,10 @@
                     </span>
                   <% end %>
                 </td>
-                <td class="px-5 py-4 text-muted">
-                  <%= @tenant_names.fetch(account.tenant_id, "—") %>
+                <%# Navy like the other columns; only the "—" for no tenant stays muted. %>
+                <% tenant_name = @tenant_names[account.tenant_id] %>
+                <td data-tenant class="px-5 py-4 <%= tenant_name ? 'text-navy' : 'text-muted' %>">
+                  <%= tenant_name || "—" %>
                 </td>
                 <td class="px-5 py-4 text-navy"><%= account.role.humanize %></td>
                 <td class="px-5 py-4">

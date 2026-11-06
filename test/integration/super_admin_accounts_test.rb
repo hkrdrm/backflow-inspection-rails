@@ -310,4 +310,18 @@ class SuperAdminAccountsTest < ActionDispatch::IntegrationTest
     assert_redirected_to "/super-admin/accounts"
     assert_equal true, @boss.reload.super_admin?
   end
+
+  # The light muted gray was hard to read; tenant names use body text color.
+  test "the accounts list shows tenant names in readable text" do
+    tenant = Tenant.create(name: "City of Richland", slug: "richland")
+    create_account(email: "admin@richland.test", tenant_id: tenant.id)
+    sign_in @boss
+
+    get "/super-admin/accounts"
+
+    assert_select "td[data-tenant]", text: "City of Richland" do |cells|
+      cells.each { |cell| assert_includes cell["class"].split, "text-navy" }
+      cells.each { |cell| assert_not_includes cell["class"].split, "text-muted" }
+    end
+  end
 end
