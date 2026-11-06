@@ -30,6 +30,13 @@ module ActiveSupport
       result
     end
 
+    # Backflow is marked active by a data migration. A test database loaded
+    # from db/structure.sql has the schema but no data rows, so make sure here
+    # (inside each test's rolled-back transaction).
+    setup do
+      PlatformModule.dataset.insert_conflict.insert(module_key: "backflow", status: "active", updated_at: Time.current)
+    end
+
     TEST_PASSWORD = "correct horse battery"
 
     # Creates a verified account that can log in through Rodauth.

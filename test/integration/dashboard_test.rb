@@ -181,4 +181,15 @@ class DashboardTest < ActionDispatch::IntegrationTest
       assert_select "aside", text: /#{label}/, count: 0
     end
   end
+
+  test "planned modules appear as Coming soon, not as links" do
+    sign_in_to_summit
+    PlatformModule.set_status!(:backflow, "planned", by: nil)
+
+    get "/dashboard"
+
+    assert_select "[data-coming-soon]", /Backflow Inspections/
+    assert_select "[data-coming-soon]", /Coming soon/
+    assert_select "main a[href=?]", "/backflow", count: 0
+  end
 end
