@@ -1,4 +1,5 @@
-<title><%= content_for(:title) || @page_title || "Backflow" %></title>
+<%# "Page · Spatial Data Engineering", or just the brand when a page sets no title. %>
+<title><%= [ content_for(:title).presence || @page_title, "Spatial Data Engineering" ].compact.join(" · ") %></title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">

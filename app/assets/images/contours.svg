@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice">
+  <!-- Topographic contour lines: the brand's background texture, replacing
+       the old water waves. Drawn in currentColor-free teal so it can be
+       layered at low opacity on light or dark surfaces. -->
+  <g fill="none" stroke="#0CA69A" stroke-width="1.2">
+    <path d="M-20 300 C 80 250, 160 330, 260 280 S 440 200, 620 250"/>
+    <path d="M-20 320 C 90 270, 170 350, 270 300 S 450 220, 620 272"/>
+    <path d="M-20 342 C 100 292, 180 372, 280 322 S 460 244, 620 296"/>
+    <path d="M-20 366 C 110 316, 190 396, 290 346 S 470 270, 620 322"/>
+    <path d="M-20 392 C 120 342, 200 422, 300 372 S 480 298, 620 350"/>
+    <path d="M380 70 C 430 30, 520 40, 540 90 S 500 170, 440 160 S 340 110, 380 70 Z"/>
+    <path d="M400 82 C 440 52, 505 60, 520 96 S 492 150, 446 144 S 372 112, 400 82 Z"/>
+    <path d="M420 94 C 450 74, 490 80, 500 102 S 482 132, 452 128 S 402 114, 420 94 Z"/>
+    <path d="M-20 120 C 60 90, 120 150, 200 120 S 300 60, 360 20"/>
+    <path d="M-20 142 C 70 112, 130 172, 210 142 S 312 84, 380 38"/>
+  </g>
+</svg>
