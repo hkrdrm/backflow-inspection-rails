@@ -108,7 +108,8 @@
     <% if current_account&.super_admin? %>
       <% platform_items = [
            { label: "Tenants",  icon: :shield, path: super_admin_tenants_path },
-           { label: "Accounts", icon: :user,   path: super_admin_accounts_path }
+           { label: "Accounts", icon: :user,   path: super_admin_accounts_path },
+           { label: "Modules",  icon: :document, path: super_admin_modules_path }
          ] %>
       <div class="mt-3 border-t border-white/10 pt-3">
         <div class="px-3 pb-2 text-[10px] font-bold uppercase tracking-widest text-sky/70">Platform</div>

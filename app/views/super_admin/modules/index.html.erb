@@ -1,0 +1,58 @@
+<% @page_title = "Modules" %>
+
+<div class="mx-auto max-w-7xl space-y-6">
+  <div>
+    <h1 class="text-2xl font-bold text-navy">Modules</h1>
+    <p class="mt-1 text-sm text-muted">Every module on the platform, and the tenants that have it.</p>
+  </div>
+
+  <div class="rounded-2xl border border-line bg-tint px-5 py-4 text-sm text-navy">
+    <span class="font-semibold">New modules are built in code.</span>
+    A module is declared in <code class="rounded bg-white px-1.5 py-0.5 text-xs">app/modules/tenant_modules/registry.rb</code>
+    with its pages under its own namespace, and appears here once it ships.
+    Add a module to a tenant from that tenant's page.
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-2">
+    <% @modules.each do |definition| %>
+      <% tenants = @tenants_by_module.fetch(definition.key, []) %>
+      <section data-module="<%= definition.key %>" class="rounded-2xl border border-line bg-white p-6">
+        <div class="flex items-start gap-3">
+          <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-tint text-brand">
+            <%= render "shared/icon", name: definition.icon, class: "size-5" %>
+          </span>
+          <div class="min-w-0">
+            <h2 class="text-lg font-bold text-navy"><%= definition.name %></h2>
+            <p class="mt-1 text-sm text-navy/70"><%= definition.description %></p>
+          </div>
+        </div>
+
+        <dl class="mt-5 space-y-3 text-sm">
+          <div>
+            <dt class="text-xs font-bold uppercase tracking-wide text-muted">Pages</dt>
+            <dd class="mt-1 text-navy"><%= definition.pages.map { |page| page[:label] }.join(" · ") %></dd>
+          </div>
+          <div>
+            <dt class="text-xs font-bold uppercase tracking-wide text-muted">
+              Used by <%= pluralize(tenants.size, "tenant") %>
+            </dt>
+            <dd class="mt-1">
+              <% if tenants.any? %>
+                <ul class="flex flex-wrap gap-2">
+                  <% tenants.each do |tenant| %>
+                    <li>
+                      <%= link_to tenant.name, edit_super_admin_tenant_path(tenant),
+                            class: "inline-flex rounded-full bg-tint px-3 py-1 text-xs font-semibold text-navy hover:bg-sky-pale" %>
+                    </li>
+                  <% end %>
+                </ul>
+              <% else %>
+                <span class="text-navy/60">No tenants yet.</span>
+              <% end %>
+            </dd>
+          </div>
+        </dl>
+      </section>
+    <% end %>
+  </div>
+</div>

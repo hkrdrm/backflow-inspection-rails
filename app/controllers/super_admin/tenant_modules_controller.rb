@@ -7,6 +7,13 @@ module SuperAdmin
     before_action :set_tenant
     before_action :set_definition
 
+    # The "Add module" form on the tenant page, which sends the key in the body.
+    def create
+      @tenant.enable_module!(@definition.key, by: current_account)
+      redirect_to edit_super_admin_tenant_path(@tenant),
+                  notice: "#{@definition.name} added to #{@tenant.name}."
+    end
+
     def enable
       @tenant.enable_module!(@definition.key, by: current_account)
       redirect_to edit_super_admin_tenant_path(@tenant),
