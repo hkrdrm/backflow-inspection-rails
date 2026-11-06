@@ -92,17 +92,58 @@ class SuperAdminTenantModulesTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
-  test "edit page lists every module with its state" do
+  test "the tenant page lists its modules with Remove" do
+    @tenant.enable_module!(:backflow, by: nil)
     sign_in @boss
 
     get "/super-admin/tenants/#{@tenant.id}/edit"
-    assert_match "Backflow Inspections", response.body
-    assert_select "form[action=?] button", "/super-admin/tenants/#{@tenant.id}/modules/backflow/enable", text: "Enable"
+
+    assert_select "[data-tenant-modules] li", text: /Backflow Inspections/
+    assert_match "Enabled since", response.body
+    assert_select "form[action=?] button", "/super-admin/tenants/#{@tenant.id}/modules/backflow/disable", text: "Remove"
+  end
+
+  test "the tenant page offers only modules the tenant does not have" do
+    sign_in @boss
+
+    get "/super-admin/tenants/#{@tenant.id}/edit"
+    assert_select "[data-tenant-modules] li", count: 0
+    assert_select "[data-add-module] select option[value=?]", "backflow", text: "Backflow Inspections"
 
     @tenant.enable_module!(:backflow, by: nil)
     get "/super-admin/tenants/#{@tenant.id}/edit"
-    assert_select "form[action=?] button", "/super-admin/tenants/#{@tenant.id}/modules/backflow/disable", text: "Disable"
-    assert_match "Enabled since", response.body
+    assert_select "[data-add-module]", count: 0, message: "nothing left to add, so no Add form"
+  end
+
+  test "adding a module from the tenant page enables it and logs who did it" do
+    sign_in @boss
+
+    post "/super-admin/tenants/#{@tenant.id}/modules", params: { key: "backflow" }
+
+    assert_redirected_to "/super-admin/tenants/#{@tenant.id}/edit"
+    assert_equal "Backflow Inspections added to City of Ruston.", flash[:notice]
+    assert @tenant.refresh.module_enabled?(:backflow)
+    assert_equal [ [ "enabled", @boss.id ] ], events.map { |e| [ e.action, e.account_id ] }
+  end
+
+  test "adding an unknown or blank module is 404" do
+    sign_in @boss
+
+    post "/super-admin/tenants/#{@tenant.id}/modules", params: { key: "nope" }
+    assert_response :not_found
+
+    post "/super-admin/tenants/#{@tenant.id}/modules", params: { key: "" }
+    assert_response :not_found
+    assert_empty events
+  end
+
+  test "a tenant admin cannot add modules" do
+    sign_in @admin
+
+    post "/super-admin/tenants/#{@tenant.id}/modules", params: { key: "backflow" }
+
+    assert_response :not_found
+    assert_not @tenant.refresh.module_enabled?(:backflow)
   end
 
   test "disable asks for confirmation" do

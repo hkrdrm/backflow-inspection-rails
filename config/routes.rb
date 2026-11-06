@@ -28,8 +28,9 @@ Rails.application.routes.draw do
         patch :deactivate
       end
 
-      # /super-admin/tenants/:tenant_id/modules/:key/enable|disable
-      resources :modules, only: [], param: :key, controller: "tenant_modules" do
+      # POST /super-admin/tenants/:tenant_id/modules (key in the form) adds one;
+      # /super-admin/tenants/:tenant_id/modules/:key/enable|disable switch one.
+      resources :modules, only: [ :create ], param: :key, controller: "tenant_modules" do
         member do
           patch :enable
           patch :disable
@@ -45,6 +46,9 @@ Rails.application.routes.draw do
         post :impersonate
       end
     end
+
+    # Read-only catalog: modules are created in code, not here.
+    resources :modules, only: [ :index ]
 
     root to: "tenants#index"
   end

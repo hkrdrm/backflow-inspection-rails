@@ -1,32 +1,44 @@
-<%# Module switches for one tenant. A separate card rather than fields in the
-    tenant form: each switch is its own audited action. %>
+<%# This tenant's modules, with Remove, and an Add form for the rest. A
+    separate card rather than fields in the tenant form: each change is its
+    own audited action. %>
+<% enabled = tenant.enabled_modules %>
+<% available = TenantModules::Registry.all - enabled %>
+
 <section class="mt-6 max-w-xl rounded-2xl border border-line bg-white p-6">
   <h2 class="text-lg font-bold text-navy">Modules</h2>
-  <p class="mt-1 text-sm text-muted">Turning a module off hides it from this tenant. Their data is kept.</p>
+  <p class="mt-1 text-sm text-navy/70">Removing a module hides it from this tenant. Their data is kept.</p>
 
-  <ul class="mt-4 divide-y divide-line">
-    <% TenantModules::Registry.all.each do |definition| %>
-      <% enabled_at = tenant.module_enabled_at(definition.key) %>
-      <li class="flex items-start justify-between gap-4 py-4">
-        <div>
-          <div class="font-semibold text-navy"><%= definition.name %></div>
-          <p class="mt-1 text-sm text-muted"><%= definition.description %></p>
-          <p class="mt-1 text-xs font-semibold <%= enabled_at ? "text-ok" : "text-muted" %>">
-            <%= enabled_at ? "Enabled since #{l(enabled_at.to_date, format: :long)}" : "Off" %>
-          </p>
-        </div>
+  <% if enabled.any? %>
+    <ul data-tenant-modules class="mt-4 divide-y divide-line">
+      <% enabled.each do |definition| %>
+        <li class="flex items-start justify-between gap-4 py-4">
+          <div>
+            <div class="font-semibold text-navy"><%= definition.name %></div>
+            <p class="mt-1 text-xs font-semibold text-ok">
+              Enabled since <%= l(tenant.module_enabled_at(definition.key).to_date, format: :long) %>
+            </p>
+          </div>
+          <%= button_to "Remove", disable_super_admin_tenant_module_path(tenant, definition.key),
+                method: :patch,
+                form: { data: { turbo_confirm: "Remove #{definition.name} from #{tenant.name}? Their data is kept and returns if you add it back." } },
+                class: "cursor-pointer rounded-lg px-3 py-1.5 text-sm font-semibold text-navy/70 hover:bg-tint hover:text-navy" %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p data-tenant-modules class="mt-4 text-sm text-navy/60">No modules yet.</p>
+  <% end %>
 
-        <% if enabled_at %>
-          <%= button_to "Disable", disable_super_admin_tenant_module_path(tenant, definition.key),
-                method: :patch,
-                form: { data: { turbo_confirm: "Turn off #{definition.name} for #{tenant.name}? Their data is kept and returns if you turn it back on." } },
-                class: "cursor-pointer rounded-lg px-3 py-1.5 text-sm font-semibold text-muted hover:bg-tint hover:text-navy" %>
-        <% else %>
-          <%= button_to "Enable", enable_super_admin_tenant_module_path(tenant, definition.key),
-                method: :patch,
-                class: "cursor-pointer rounded-lg px-3 py-1.5 text-sm font-semibold text-ok hover:bg-ok-pale/40" %>
-        <% end %>
-      </li>
+  <% if available.any? %>
+    <%= form_with url: super_admin_tenant_modules_path(tenant), method: :post,
+          data: { add_module: true }, class: "mt-4 flex items-end gap-3 border-t border-line pt-4" do |f| %>
+      <div class="flex-1">
+        <%= f.label :key, "Add module", class: "block text-sm font-semibold text-navy" %>
+        <%= f.select :key, available.map { |definition| [ definition.name, definition.key ] }, {},
+              class: "mt-1 w-full rounded-xl border border-line px-3 py-2 focus:border-brand focus:outline-none" %>
+      </div>
+      <%= f.submit "Add",
+            class: "cursor-pointer rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-brand-dark" %>
     <% end %>
-  </ul>
+  <% end %>
 </section>
