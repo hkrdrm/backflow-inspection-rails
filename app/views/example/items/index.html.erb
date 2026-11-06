@@ -1,0 +1,39 @@
+<% @page_title = "Items" %>
+
+<div class="space-y-6">
+  <div class="flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-navy">Items</h1>
+      <p class="mt-1 text-sm text-navy/70">Items belonging to <%= current_tenant.name %>.</p>
+    </div>
+
+    <%= link_to new_example_item_path,
+          class: "inline-flex shrink-0 items-center gap-2 rounded-xl bg-brand px-5 py-3 text-sm font-bold text-white shadow-sm hover:bg-brand-dark" do %>
+      <%= render "shared/icon", name: :plus, class: "size-5" %>
+      New item
+    <% end %>
+  </div>
+
+  <div class="rounded-2xl border border-line bg-white">
+    <% if @items.empty? %>
+      <p class="px-5 py-10 text-center text-sm text-navy/60">No items yet.</p>
+    <% else %>
+      <table class="w-full text-left text-sm">
+        <thead>
+          <tr class="text-xs uppercase tracking-wide text-muted">
+            <th class="px-5 py-3 font-semibold">Name</th>
+            <th class="px-5 py-3 font-semibold">Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @items.each do |item| %>
+            <tr class="border-t border-line">
+              <td class="px-5 py-4 font-semibold text-navy"><%= item.name %></td>
+              <td class="px-5 py-4 text-navy/70"><%= item.notes %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+  </div>
+</div>

@@ -21,6 +21,13 @@ Rails.application.routes.draw do
     resources :testers, only: [ :index, :new, :create, :edit, :update ]
   end
 
+  # The template module (see docs/modules.md). Same shape as every module: one
+  # namespace named after the registry key, gated by Example::BaseController.
+  namespace :example do
+    root to: "home#show"
+    resources :items, only: [ :index, :new, :create ]
+  end
+
   namespace :super_admin, path: "super-admin" do
     resources :tenants, only: [ :index, :new, :create, :edit, :update ] do
       member do

@@ -37,4 +37,16 @@ class TenantModules::RegistryTest < ActiveSupport::TestCase
   test "keys follow all" do
     assert_equal Registry.all.map(&:key), Registry.keys
   end
+
+  test "declares the example template module" do
+    example = Registry.find("example")
+
+    assert_equal "Example Module", example.name
+    assert_equal [ "Overview", "Items" ], example.pages.map { |page| page[:label] }
+  end
+
+  # Shipping a module in code must not switch it on for anyone.
+  test "the example module ships disabled platform-wide" do
+    assert_equal "disabled", PlatformModule.status_for(:example)
+  end
 end
