@@ -29,7 +29,8 @@
             </div>
           <% end %>
 
-          <%= yield %>
+          <%# A nested layout (layouts/tenant_module) wraps pages in :content. %>
+          <%= content_for?(:content) ? yield(:content) : yield %>
         </main>
       </div>
     </div>

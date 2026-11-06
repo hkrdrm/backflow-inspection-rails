@@ -1,0 +1,8 @@
+<% @page_title = "Edit #{@plumber.name}" %>
+
+<div>
+  <h2 class="text-xl font-bold text-navy">Edit <%= @plumber.name %></h2>
+
+  <%= render "form", plumber: @plumber, url: backflow_tester_path(@plumber),
+        method: :patch, submit_label: "Save changes" %>
+</div>

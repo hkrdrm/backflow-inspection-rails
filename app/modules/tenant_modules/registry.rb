@@ -13,9 +13,10 @@ module TenantModules
         key: "backflow",
         name: "Backflow Inspections",
         description: "Backflow prevention device testing and reporting, per Louisiana requirements.",
-        home_path: :backflow_root_path,
-        nav_items: [
-          { label: "Inspections", icon: :calendar, path: :backflow_root_path }
+        icon: :droplet,
+        tabs: [
+          { label: "Overview", path: :backflow_root_path },
+          { label: "Testers", path: :backflow_testers_path }
         ].freeze
       )
     ].freeze

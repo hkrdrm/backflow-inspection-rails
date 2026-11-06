@@ -1,18 +1,18 @@
 <%#
   Sidebar for the signed-in app shell.
 
-  Core items appear for every tenant. Each module the tenant has then adds its
-  own items, declared in TenantModules::Registry, so a tenant only sees links
-  to modules it can use. Items without a path render as inert entries rather
-  than links to nowhere.
+  Dashboard, then one link per module the tenant has, then Settings. A
+  module's own pages are tabs inside the module (layouts/tenant_module), so
+  the sidebar stays short however much a module contains. The module link is
+  current on every page in that module. Items without a path render as inert
+  entries rather than links to nowhere.
 %>
-<%# Settings stays last, below every module's items. %>
-<% module_items = Array(current_tenant&.enabled_modules).flat_map(&:nav_items).map do |item|
-     item.merge(path: public_send(item[:path]))
+<% module_items = Array(current_tenant&.enabled_modules).map do |definition|
+     { label: definition.name, icon: definition.icon, path: public_send(definition.home_path),
+       current: current_module&.key == definition.key }
    end %>
 <% nav_items = [
      { label: "Dashboard", icon: :home, path: dashboard_path },
-     { label: "Plumbers", icon: :user, path: plumbers_path },
      *module_items,
      { label: "Settings", icon: :gear }
    ] %>
@@ -45,8 +45,9 @@
         <% nav_items.each do |item| %>
           <li>
             <% if item[:path] %>
-              <% active = current_page?(item[:path]) %>
+              <% active = item.fetch(:current) { current_page?(item[:path]) } %>
               <%= link_to item[:path],
+                    "aria-current": (active ? "page" : nil),
                     class: "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition #{active ? 'bg-brand text-white shadow-sm' : 'hover:bg-white/10 hover:text-white'}" do %>
                 <%= render "shared/icon", name: item[:icon], class: "size-5 shrink-0" %>
                 <%= item[:label] %>

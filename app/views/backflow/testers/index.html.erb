@@ -1,22 +1,22 @@
-<% @page_title = "Plumbers" %>
+<% @page_title = "Testers" %>
 
-<div class="mx-auto max-w-7xl space-y-6">
+<div class="space-y-6">
   <div class="flex flex-wrap items-center justify-between gap-4">
     <div>
-      <h1 class="text-2xl font-bold text-navy">Plumbers</h1>
+      <h2 class="text-xl font-bold text-navy">Testers</h2>
       <p class="mt-1 text-sm text-muted">Certified testers approved by <%= current_tenant.name %>.</p>
     </div>
 
-    <%= link_to new_plumber_path,
+    <%= link_to new_backflow_tester_path,
           class: "inline-flex shrink-0 items-center gap-2 rounded-xl bg-brand px-5 py-3 text-sm font-bold text-white shadow-sm hover:bg-brand-dark" do %>
       <%= render "shared/icon", name: :plus, class: "size-5" %>
-      New plumber
+      New tester
     <% end %>
   </div>
 
   <div class="rounded-2xl border border-line bg-white">
     <% if @plumbers.empty? %>
-      <p class="px-5 py-10 text-center text-sm text-muted">No plumbers yet.</p>
+      <p class="px-5 py-10 text-center text-sm text-muted">No testers yet.</p>
     <% else %>
       <div class="overflow-x-auto">
         <table class="w-full min-w-[720px] text-left text-sm">
@@ -53,7 +53,7 @@
                 </td>
                 <td class="px-5 py-4">
                   <div class="flex items-center justify-end">
-                    <%= link_to "Edit", edit_plumber_path(plumber),
+                    <%= link_to "Edit", edit_backflow_tester_path(plumber),
                           class: "rounded-lg px-3 py-1.5 text-sm font-semibold text-brand hover:bg-tint" %>
                   </div>
                 </td>

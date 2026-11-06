@@ -6,5 +6,8 @@ module Backflow
     include RequiresModule
 
     requires_module :backflow
+
+    # Module name and tabs around every page; see layouts/tenant_module.
+    layout "tenant_module"
   end
 end
