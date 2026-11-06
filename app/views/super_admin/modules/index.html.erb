@@ -17,7 +17,10 @@
     <% @modules.each do |definition| %>
       <% tenants = @tenants_by_module.fetch(definition.key, []) %>
       <% status = @statuses.fetch(definition.key) %>
-      <section data-module="<%= definition.key %>" class="rounded-2xl border border-line bg-white p-6">
+      <%# A firmer outline and shadow than the page's pale lines, so cards stand
+          apart; the thick left edge is teal when enabled, grey when disabled. %>
+      <section data-module="<%= definition.key %>"
+               class="rounded-2xl border border-navy/15 border-l-4 <%= status == "active" ? "border-l-brand" : "border-l-navy/25" %> bg-white p-6 shadow-sm">
         <div class="flex items-start gap-3">
           <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-tint text-brand">
             <%= render "shared/icon", name: definition.icon, class: "size-5" %>
