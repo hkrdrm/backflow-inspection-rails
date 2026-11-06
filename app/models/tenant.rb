@@ -13,7 +13,7 @@ class Tenant < Sequel::Model
   #
   # Two levels: a module is *assigned* to a tenant (a tenant_modules row), and
   # *enabled* for it when it is also active platform-wide (PlatformModule). A
-  # module disabled or planned platform-wide stays assigned but is off.
+  # module disabled platform-wide stays assigned but is off.
   # Keys whose rows exist but which are no longer in TenantModules::Registry
   # (a module removed from code) are treated as off everywhere.
 

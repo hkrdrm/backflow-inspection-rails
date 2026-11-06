@@ -277,7 +277,7 @@ CREATE TABLE public.platform_modules (
     status text NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_by_account_id bigint,
-    CONSTRAINT platform_modules_status_valid CHECK ((status = ANY (ARRAY['active'::text, 'disabled'::text, 'planned'::text])))
+    CONSTRAINT platform_modules_status_valid CHECK ((status = ANY (ARRAY['active'::text, 'disabled'::text])))
 );
 
 
@@ -776,3 +776,4 @@ INSERT INTO "schema_migrations" ("filename") VALUES ('20260816021500_use_timesta
 INSERT INTO "schema_migrations" ("filename") VALUES ('20261105120000_create_tenant_modules.rb');
 INSERT INTO "schema_migrations" ("filename") VALUES ('20261106120000_create_platform_modules.rb');
 INSERT INTO "schema_migrations" ("filename") VALUES ('20261106130000_create_example_items.rb');
+INSERT INTO "schema_migrations" ("filename") VALUES ('20261106140000_drop_planned_module_status.rb');

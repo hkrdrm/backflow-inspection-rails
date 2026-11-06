@@ -23,11 +23,11 @@ class PlatformModuleTest < ActiveSupport::TestCase
   end
 
   test "changing status records who changed it, from what, to what" do
-    assert PlatformModule.set_status!(:backflow, "planned", by: @boss)
+    assert PlatformModule.set_status!(:backflow, "disabled", by: @boss)
 
-    assert_equal "planned", PlatformModule.status_for(:backflow)
+    assert_equal "disabled", PlatformModule.status_for(:backflow)
     event = events.last
-    assert_equal [ "backflow", "active", "planned", @boss.id ],
+    assert_equal [ "backflow", "active", "disabled", @boss.id ],
                  [ event.module_key, event.from_status, event.to_status, event.account_id ]
   end
 
@@ -47,6 +47,8 @@ class PlatformModuleTest < ActiveSupport::TestCase
 
   test "unknown statuses and modules are rejected" do
     assert_raises(ArgumentError) { PlatformModule.set_status!(:backflow, "retired", by: @boss) }
+    # Planned was dropped: modules are only enabled or disabled.
+    assert_raises(ArgumentError) { PlatformModule.set_status!(:backflow, "planned", by: @boss) }
     assert_raises(ArgumentError) { PlatformModule.set_status!(:nope, "active", by: @boss) }
   end
 end

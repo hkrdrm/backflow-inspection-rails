@@ -12,17 +12,16 @@ There are three layers:
 | Layer | Where | Who changes it |
 |---|---|---|
 | **What a module is**: name, description, icon, pages | `app/modules/tenant_modules/registry.rb` plus the module's code | developers, in code |
-| **Platform status**: Active, Disabled or Planned | `platform_modules` table | super admins, on Platform → Modules |
+| **Platform status**: Enabled or Disabled | `platform_modules` table | super admins, on Platform → Modules |
 | **Which tenants have it** | `tenant_modules` table | super admins, on each tenant's edit page |
 
-A tenant can use a module only when it's **assigned to the tenant and Active
-platform-wide**.
+A tenant can use a module only when it's **assigned to the tenant and
+Enabled platform-wide**.
 
-- **Active:** it can be added to tenants, and tenants who have it use it.
+- **Enabled** (stored as `active`): it can be added to tenants, and tenants
+  who have it use it.
 - **Disabled:** it can't be added. Tenants who have it lose access, but keep
-  their assignment and data, and get both back when it's Active again.
-- **Planned:** it can't be added, and tenants see it as "Coming soon" on their
-  overview.
+  their assignment and data, and get both back when it's Enabled again.
 
 **A module that ships in code with no `platform_modules` row counts as
 Disabled.** New modules are therefore off everywhere until a super admin
@@ -79,6 +78,5 @@ example `monitoring` / `Monitoring`.
    returning 404 while disabled platform-wide, and each tenant seeing only its
    own data. In tests, turn the module on with
    `PlatformModule.set_status!(:monitoring, "active", by: nil)`.
-7. **Ship it.** It deploys as **Disabled**. On **Platform → Modules**, mark it
-   **Planned** to show it as Coming soon, or **Active** to start adding it to
-   tenants from their edit pages.
+7. **Ship it.** It deploys as **Disabled**. On **Platform → Modules**, click
+   **Enable**, then add it to tenants from their edit pages.

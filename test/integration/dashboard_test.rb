@@ -182,14 +182,12 @@ class DashboardTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "planned modules appear as Coming soon, not as links" do
+  test "the overview has no Coming soon cards" do
     sign_in_to_summit
-    PlatformModule.set_status!(:backflow, "planned", by: nil)
+    PlatformModule.set_status!(:backflow, "disabled", by: nil)
 
     get "/dashboard"
 
-    assert_select "[data-coming-soon]", /Backflow Inspections/
-    assert_select "[data-coming-soon]", /Coming soon/
-    assert_select "main a[href=?]", "/backflow", count: 0
+    assert_no_match "Coming soon", response.body
   end
 end

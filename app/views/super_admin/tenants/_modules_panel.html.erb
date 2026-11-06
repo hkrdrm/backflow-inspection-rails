@@ -1,8 +1,8 @@
 <%# This tenant's modules, with Remove, and an Add form for the rest. A
     separate card rather than fields in the tenant form: each change is its
     own audited action. %>
-<%# Assigned modules include ones disabled or planned platform-wide (still
-    assigned, but off); only active modules can be added. %>
+<%# Assigned modules include ones disabled platform-wide (still assigned,
+    but off); only enabled modules can be added. %>
 <% assigned = tenant.assigned_modules %>
 <% statuses = PlatformModule.statuses %>
 <% available = TenantModules::Registry.all.select { |definition| statuses[definition.key] == "active" } - assigned %>
@@ -22,7 +22,7 @@
             </p>
             <% unless statuses[definition.key] == "active" %>
               <p class="mt-1 text-xs font-semibold text-warn-strong">
-                <%= SuperAdmin::ModulesController::STATUS_LABELS.fetch(statuses[definition.key]) %> platform-wide: this tenant can't use it until it's active again.
+                <%= SuperAdmin::ModulesController::STATUS_LABELS.fetch(statuses[definition.key]) %> platform-wide: this tenant can't use it until it's enabled again.
               </p>
             <% end %>
           </div>

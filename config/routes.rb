@@ -55,7 +55,7 @@ Rails.application.routes.draw do
     end
 
     # Catalog of modules (created in code, not here) and their platform-wide
-    # status (PATCH with status=active|disabled|planned).
+    # status (PATCH with status=active|disabled).
     resources :modules, only: [ :index, :update ], param: :key
 
     root to: "tenants#index"

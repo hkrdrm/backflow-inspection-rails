@@ -2,9 +2,9 @@ module SuperAdmin
   # Platform → Modules: every module that exists, its platform-wide status,
   # and the tenants that have it. A module is created in code
   # (TenantModules::Registry plus its namespace), assigned to tenants from each
-  # tenant's page, and switched active / disabled / planned here.
+  # tenant's page, and enabled or disabled for the whole platform here.
   class ModulesController < BaseController
-    STATUS_LABELS = { "active" => "Active", "disabled" => "Disabled", "planned" => "Planned" }.freeze
+    STATUS_LABELS = { "active" => "Enabled", "disabled" => "Disabled" }.freeze
 
     def index
       @modules = TenantModules::Registry.all

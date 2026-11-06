@@ -178,7 +178,7 @@ class SuperAdminTenantModulesTest < ActionDispatch::IntegrationTest
   # --- Platform-wide status ---------------------------------------------------
 
   test "the Add module dropdown offers only active modules" do
-    PlatformModule.set_status!(:backflow, "planned", by: nil)
+    PlatformModule.set_status!(:backflow, "disabled", by: nil)
     sign_in @boss
 
     get "/super-admin/tenants/#{@tenant.id}/edit"
