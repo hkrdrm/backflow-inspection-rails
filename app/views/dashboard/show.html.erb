@@ -6,9 +6,9 @@
 <div class="mx-auto max-w-7xl space-y-6">
   <div>
     <h1 class="text-2xl font-bold text-navy">
-      Welcome back, <%= current_tenant.name %>.
+      Welcome back, <%= current_account.email.split("@").first.capitalize %>.
     </h1>
-    <p class="mt-1 text-sm text-muted">Signed in as <%= current_account.email %>.</p>
+    <p class="mt-1 text-sm text-muted"><%= current_tenant.name %> · <%= current_account.email %></p>
   </div>
 
   <% if modules.empty? %>

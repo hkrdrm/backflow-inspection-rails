@@ -60,12 +60,22 @@ class DashboardTest < ActionDispatch::IntegrationTest
     tenant
   end
 
-  test "dashboard names the tenant" do
+  test "dashboard greets the person and names the tenant" do
     sign_in_to_summit
 
     get "/dashboard"
 
-    assert_select "h1", /City of Summit/
+    assert_select "h1", /Welcome back, Owner\./
+    assert_select "main p", /City of Summit/
+  end
+
+  test "module nav items sit above Settings" do
+    sign_in_to_summit.enable_module!(:backflow, by: nil)
+
+    get "/dashboard"
+
+    labels = css_select("aside nav li").map { |li| li.text.strip }
+    assert_operator labels.index("Inspections"), :<, labels.index("Settings")
   end
 
   test "a tenant with backflow gets a card linking to it" do
