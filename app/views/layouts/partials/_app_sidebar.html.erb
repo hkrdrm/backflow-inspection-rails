@@ -29,16 +29,16 @@
   <div class="px-5 py-6">
     <% if logo_path %>
       <%= link_to logo_path, class: "block" do %>
-        <%= image_tag "backflow-lockup.png", alt: "Backflow", class: "h-11 w-auto" %>
+        <%= render "shared/logo", tone: :light %>
       <% end %>
     <% else %>
-      <%= image_tag "backflow-lockup.png", alt: "Backflow", class: "h-11 w-auto" %>
+      <%= render "shared/logo", tone: :light %>
     <% end %>
   </div>
 
   <nav class="relative mx-3 mb-3 flex flex-1 flex-col overflow-hidden rounded-2xl bg-navy pt-4 text-sky-pale">
-    <%= image_tag "wave-hero.png", alt: "",
-          class: "pointer-events-none absolute inset-x-0 bottom-0 w-full opacity-25 select-none" %>
+    <%= image_tag "contours.svg", alt: "",
+          class: "pointer-events-none absolute inset-x-0 bottom-0 h-64 w-full object-cover opacity-30 select-none" %>
 
     <ul class="relative space-y-1 px-3">
       <% if current_tenant %>
@@ -93,10 +93,9 @@
           </span>
           <div class="text-sm font-bold text-white">Need Help?</div>
         </div>
+        <%# Neutral until Spatial Data Engineering has a support address. %>
         <p class="mt-2 text-xs leading-5 text-sky-pale/70">
-          Contact our support team<br>
-          (601) 555-0123<br>
-          support@backflowapp.com
+          Contact your administrator.
         </p>
       </div>
     </div>

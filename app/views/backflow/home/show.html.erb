@@ -170,12 +170,14 @@
 
   <%# ---- Assurance band ---- %>
   <div class="relative overflow-hidden rounded-2xl border border-line bg-white p-6">
-    <%= image_tag "wave-band.png", alt: "",
-          class: "pointer-events-none absolute bottom-0 right-0 w-80 opacity-20 select-none" %>
+    <%= image_tag "contours.svg", alt: "",
+          class: "pointer-events-none absolute bottom-0 right-0 h-full w-96 object-cover opacity-20 select-none" %>
 
     <div class="relative grid gap-6 md:grid-cols-4">
       <div class="flex items-start gap-3">
-        <%= image_tag "backflow-mark-navy.png", alt: "", class: "size-12 shrink-0 rounded-xl" %>
+        <span class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-tint text-brand">
+          <%= render "shared/icon", name: :droplet, class: "size-6" %>
+        </span>
         <div>
           <div class="font-bold leading-snug text-navy">Protecting our water.<br>Protecting our community.</div>
           <p class="mt-2 text-xs leading-5 text-muted">
