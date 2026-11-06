@@ -47,8 +47,9 @@ Rails.application.routes.draw do
       end
     end
 
-    # Read-only catalog: modules are created in code, not here.
-    resources :modules, only: [ :index ]
+    # Catalog of modules (created in code, not here) and their platform-wide
+    # status (PATCH with status=active|disabled|planned).
+    resources :modules, only: [ :index, :update ], param: :key
 
     root to: "tenants#index"
   end

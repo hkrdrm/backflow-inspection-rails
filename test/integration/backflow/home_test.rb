@@ -66,4 +66,14 @@ class BackflowHomeTest < ActionDispatch::IntegrationTest
 
     assert_response :not_found
   end
+
+  test "a module disabled platform-wide is 404 even for tenants who have it" do
+    @tenant.enable_module!(:backflow, by: nil)
+    PlatformModule.set_status!(:backflow, "disabled", by: nil)
+    sign_in @staff
+
+    get "/backflow"
+
+    assert_response :not_found
+  end
 end

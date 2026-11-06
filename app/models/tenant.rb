@@ -11,6 +11,9 @@ class Tenant < Sequel::Model
 
   # --- Modules -------------------------------------------------------------
   #
+  # Two levels: a module is *assigned* to a tenant (a tenant_modules row), and
+  # *enabled* for it when it is also active platform-wide (PlatformModule). A
+  # module disabled or planned platform-wide stays assigned but is off.
   # Keys whose rows exist but which are no longer in TenantModules::Registry
   # (a module removed from code) are treated as off everywhere.
 
@@ -18,22 +21,33 @@ class Tenant < Sequel::Model
     enabled_module_keys.include?(key.to_s)
   end
 
-  # Registry definitions this tenant has, in registry order.
+  # Registry definitions this tenant can use, in registry order.
   def enabled_modules
     TenantModules::Registry.all.select { |definition| enabled_module_keys.include?(definition.key) }
   end
 
+  def module_assigned?(key)
+    assigned_module_keys.include?(key.to_s)
+  end
+
+  # Registry definitions assigned to this tenant, whatever their platform status.
+  def assigned_modules
+    TenantModules::Registry.all.select { |definition| assigned_module_keys.include?(definition.key) }
+  end
+
   def module_enabled_at(key)
-    return unless module_enabled?(key)
+    return unless module_assigned?(key)
 
     tenant_modules_dataset.where(module_key: key.to_s).get(:enabled_at)
   end
 
   # Returns true if the module was off and is now on, false if it was already
-  # on. The row and its audit event are written together or not at all.
+  # on. The row and its audit event are written together or not at all. Only
+  # modules active platform-wide can be added (PlatformModule::NotActive).
   def enable_module!(key, by:)
     key = registered_module_key!(key)
-    return false if module_enabled?(key)
+    raise PlatformModule::NotActive, "#{key} is not active platform-wide" unless PlatformModule.status_for(key) == "active"
+    return false if module_assigned?(key)
 
     db.transaction do
       # Savepoint so that losing a race to the unique index rolls back only the
@@ -52,7 +66,7 @@ class Tenant < Sequel::Model
       inserted
     end
   ensure
-    @enabled_module_keys = nil
+    clear_module_memo
   end
 
   # Returns true if the module was on and is now off. Only the switch is
@@ -66,11 +80,11 @@ class Tenant < Sequel::Model
       removed
     end
   ensure
-    @enabled_module_keys = nil
+    clear_module_memo
   end
 
   def refresh
-    @enabled_module_keys = nil
+    clear_module_memo
     super
   end
 
@@ -83,9 +97,18 @@ class Tenant < Sequel::Model
   private
 
   # Memoized per instance; current_tenant is memoized per request, so the
-  # sidebar, dashboard and module guard share one query.
+  # sidebar, dashboard and module guard share these queries.
+  def assigned_module_keys
+    @assigned_module_keys ||= tenant_modules_dataset.select_map(:module_key) & TenantModules::Registry.keys
+  end
+
   def enabled_module_keys
-    @enabled_module_keys ||= tenant_modules_dataset.select_map(:module_key) & TenantModules::Registry.keys
+    @enabled_module_keys ||= assigned_module_keys & PlatformModule.active_keys
+  end
+
+  def clear_module_memo
+    @assigned_module_keys = nil
+    @enabled_module_keys = nil
   end
 
   def registered_module_key!(key)

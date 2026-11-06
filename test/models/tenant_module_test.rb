@@ -40,7 +40,7 @@ class TenantModuleTest < ActiveSupport::TestCase
   test "a unique-index race is treated as already enabled" do
     TenantModule.dataset.insert(tenant_id: @tenant.id, module_key: "backflow", enabled_at: Time.current)
 
-    @tenant.stub(:module_enabled?, false) do
+    @tenant.stub(:module_assigned?, false) do
       assert_not @tenant.enable_module!(:backflow, by: @boss)
     end
     assert_empty events
@@ -98,5 +98,37 @@ class TenantModuleTest < ActiveSupport::TestCase
 
   test "the model rejects keys outside the registry" do
     assert_not TenantModule.new(tenant_id: @tenant.id, module_key: "nope").valid?
+  end
+
+  # --- Platform-wide status ----------------------------------------------------
+
+  test "a module disabled platform-wide is off for tenants, but stays assigned" do
+    @tenant.enable_module!(:backflow, by: @boss)
+    PlatformModule.set_status!(:backflow, "disabled", by: @boss)
+
+    @tenant.refresh
+    assert_not @tenant.module_enabled?(:backflow)
+    assert_empty @tenant.enabled_modules
+    assert_equal [ "backflow" ], @tenant.assigned_modules.map(&:key)
+
+    PlatformModule.set_status!(:backflow, "active", by: @boss)
+    assert @tenant.refresh.module_enabled?(:backflow)
+  end
+
+  test "only active modules can be added to a tenant" do
+    %w[disabled planned].each do |status|
+      PlatformModule.set_status!(:backflow, status, by: @boss)
+
+      assert_raises(PlatformModule::NotActive) { @tenant.enable_module!(:backflow, by: @boss) }
+      assert_empty @tenant.refresh.assigned_modules
+    end
+  end
+
+  test "a module can be removed from a tenant whatever its platform status" do
+    @tenant.enable_module!(:backflow, by: @boss)
+    PlatformModule.set_status!(:backflow, "disabled", by: @boss)
+
+    assert @tenant.disable_module!(:backflow, by: @boss)
+    assert_empty @tenant.refresh.assigned_modules
   end
 end

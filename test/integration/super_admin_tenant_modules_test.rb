@@ -174,4 +174,37 @@ class SuperAdminTenantModulesTest < ActionDispatch::IntegrationTest
     get "/super-admin/tenants"
     assert_response :success
   end
+
+  # --- Platform-wide status ---------------------------------------------------
+
+  test "the Add module dropdown offers only active modules" do
+    PlatformModule.set_status!(:backflow, "planned", by: nil)
+    sign_in @boss
+
+    get "/super-admin/tenants/#{@tenant.id}/edit"
+
+    assert_select "[data-add-module]", count: 0
+  end
+
+  test "adding a module that isn't active is refused" do
+    PlatformModule.set_status!(:backflow, "disabled", by: nil)
+    sign_in @boss
+
+    post "/super-admin/tenants/#{@tenant.id}/modules", params: { key: "backflow" }
+
+    assert_redirected_to "/super-admin/tenants/#{@tenant.id}/edit"
+    assert_equal "Backflow Inspections is Disabled platform-wide, so it can't be added.", flash[:alert]
+    assert_not @tenant.refresh.module_assigned?(:backflow)
+  end
+
+  test "an assigned module that is off platform-wide says so on the tenant page" do
+    @tenant.enable_module!(:backflow, by: nil)
+    PlatformModule.set_status!(:backflow, "disabled", by: nil)
+    sign_in @boss
+
+    get "/super-admin/tenants/#{@tenant.id}/edit"
+
+    assert_select "[data-tenant-modules] li", /Backflow Inspections/
+    assert_select "[data-tenant-modules] li", /Disabled platform-wide/
+  end
 end
