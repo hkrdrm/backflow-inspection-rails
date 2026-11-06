@@ -1,0 +1,32 @@
+<%# Module switches for one tenant. A separate card rather than fields in the
+    tenant form: each switch is its own audited action. %>
+<section class="mt-6 max-w-xl rounded-2xl border border-line bg-white p-6">
+  <h2 class="text-lg font-bold text-navy">Modules</h2>
+  <p class="mt-1 text-sm text-muted">Turning a module off hides it from this tenant. Their data is kept.</p>
+
+  <ul class="mt-4 divide-y divide-line">
+    <% TenantModules::Registry.all.each do |definition| %>
+      <% enabled_at = tenant.module_enabled_at(definition.key) %>
+      <li class="flex items-start justify-between gap-4 py-4">
+        <div>
+          <div class="font-semibold text-navy"><%= definition.name %></div>
+          <p class="mt-1 text-sm text-muted"><%= definition.description %></p>
+          <p class="mt-1 text-xs font-semibold <%= enabled_at ? "text-ok" : "text-muted" %>">
+            <%= enabled_at ? "Enabled since #{l(enabled_at.to_date, format: :long)}" : "Off" %>
+          </p>
+        </div>
+
+        <% if enabled_at %>
+          <%= button_to "Disable", disable_super_admin_tenant_module_path(tenant, definition.key),
+                method: :patch,
+                form: { data: { turbo_confirm: "Turn off #{definition.name} for #{tenant.name}? Their data is kept and returns if you turn it back on." } },
+                class: "cursor-pointer rounded-lg px-3 py-1.5 text-sm font-semibold text-muted hover:bg-tint hover:text-navy" %>
+        <% else %>
+          <%= button_to "Enable", enable_super_admin_tenant_module_path(tenant, definition.key),
+                method: :patch,
+                class: "cursor-pointer rounded-lg px-3 py-1.5 text-sm font-semibold text-ok hover:bg-ok-pale/40" %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+</section>
