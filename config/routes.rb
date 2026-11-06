@@ -28,6 +28,14 @@ Rails.application.routes.draw do
         patch :activate
         patch :deactivate
       end
+
+      # /super-admin/tenants/:tenant_id/modules/:key/enable|disable
+      resources :modules, only: [], param: :key, controller: "tenant_modules" do
+        member do
+          patch :enable
+          patch :disable
+        end
+      end
     end
     resources :accounts, only: [ :index, :new, :create, :edit, :update ] do
       member do
