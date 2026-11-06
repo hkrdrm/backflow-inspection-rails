@@ -136,6 +136,19 @@ class RodauthMain < Rodauth::Rails::Auth
     end
 
     # ==> Redirects
+    # Land somewhere useful after logging in: the organization's overview, or
+    # the back office for a platform operator with no organization. Verified
+    # accounts arrive here too, through verify_account_redirect below.
+    login_redirect do
+      if rails_account.tenant_id
+        "/dashboard"
+      elsif rails_account.super_admin
+        "/super-admin"
+      else
+        "/"
+      end
+    end
+
     # Redirect to home page after logout.
     logout_redirect "/"
 
