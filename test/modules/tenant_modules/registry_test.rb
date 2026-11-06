@@ -10,12 +10,12 @@ class TenantModules::RegistryTest < ActiveSupport::TestCase
     assert_equal :backflow_root_path, backflow.home_path
   end
 
-  test "backflow declares its tabs, and home is the first one" do
+  test "backflow declares its pages, and home is the first one" do
     backflow = Registry.find("backflow")
 
-    assert_equal [ "Overview", "Testers" ], backflow.tabs.map { |tab| tab[:label] }
-    assert_equal [ :backflow_root_path, :backflow_testers_path ], backflow.tabs.map { |tab| tab[:path] }
-    assert_equal backflow.tabs.first[:path], backflow.home_path
+    assert_equal [ "Overview", "Testers" ], backflow.pages.map { |page| page[:label] }
+    assert_equal [ :backflow_root_path, :backflow_testers_path ], backflow.pages.map { |page| page[:path] }
+    assert_equal backflow.pages.first[:path], backflow.home_path
   end
 
   test "finds by symbol or string" do

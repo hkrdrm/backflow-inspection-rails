@@ -1,3 +1,4 @@
+<%# The signed-in account and log out live at the bottom of the sidebar. %>
 <header class="flex items-center justify-between gap-4 border-b border-line bg-white px-4 py-3 lg:px-8">
   <button type="button" class="lg:hidden -ml-1 rounded-lg p-2 text-navy hover:bg-tint"
           data-action="click->mobile-menu#toggle" aria-label="Toggle menu" aria-expanded="false">
@@ -19,25 +20,5 @@
       <%= render "shared/icon", name: :help, class: "size-5" %>
     </span>
 
-    <div class="h-8 w-px bg-line"></div>
-
-    <div class="flex items-center gap-3">
-      <div class="hidden text-right sm:block">
-        <div class="text-sm font-bold leading-tight text-navy"><%= current_account.email.split("@").first %></div>
-        <div class="text-xs text-muted">
-          <%= current_account.super_admin? ? "Platform Operator" : "Property Owner" %>
-        </div>
-      </div>
-
-      <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-navy text-sm font-bold uppercase text-white">
-        <%= current_account.email.first %>
-      </span>
-
-      <%= button_to rodauth.logout_path, method: :post,
-            class: "rounded-lg p-1.5 text-muted hover:bg-tint hover:text-navy cursor-pointer",
-            title: "Log out", form: { data: { turbo: false } } do %>
-        <%= render "shared/icon", name: :chevron_down, class: "size-4" %>
-      <% end %>
-    </div>
   </div>
 </header>

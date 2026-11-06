@@ -1,7 +1,7 @@
 require "test_helper"
 
-# Every page in a module shares one header and tab row, and the module's
-# sidebar link stays highlighted on all of them.
+# Inside a module, the sidebar expands that module to list its pages and the
+# main area shows a breadcrumb (home › module › page).
 class BackflowModuleLayoutTest < ActionDispatch::IntegrationTest
   setup do
     @tenant = Tenant.create(name: "City of Ruston", slug: "ruston")
@@ -9,38 +9,46 @@ class BackflowModuleLayoutTest < ActionDispatch::IntegrationTest
     sign_in create_account(email: "staff@ruston.test", tenant_id: @tenant.id)
   end
 
-  test "module pages show the module header and its tabs" do
-    get "/backflow"
-
-    assert_select "[data-module-header] h1", "Backflow Inspections"
-    assert_select "[data-module-tabs] a[href=?]", "/backflow", text: "Overview"
-    assert_select "[data-module-tabs] a[href=?]", "/backflow/testers", text: "Testers"
-  end
-
-  test "the current tab is marked on its own page" do
-    get "/backflow"
-    assert_select "[data-module-tabs] a[aria-current=page]", text: "Overview"
-
+  test "the breadcrumb names the module and the current page" do
     get "/backflow/testers"
-    assert_select "[data-module-tabs] a[aria-current=page]", text: "Testers"
+
+    assert_select "[data-breadcrumb] a[href=?]", "/dashboard"
+    assert_select "[data-breadcrumb] a[href=?]", "/backflow", text: "Backflow Inspections"
+    assert_select "[data-breadcrumb] [aria-current=page]", text: "Testers"
   end
 
-  test "a tab stays current on its sub-pages" do
+  test "the breadcrumb follows a page onto its sub-pages" do
     get "/backflow/testers/new"
 
-    assert_select "[data-module-tabs] a[aria-current=page]", text: "Testers"
+    assert_select "[data-breadcrumb] [aria-current=page]", text: "Testers"
   end
 
-  test "the module's sidebar link is highlighted on every module page" do
-    [ "/backflow", "/backflow/testers", "/backflow/testers/new" ].each do |path|
-      get path
-      assert_select "aside a[href=?][aria-current=page]", "/backflow", { count: 1 }, "on #{path}"
+  test "the current module lists its pages in the sidebar" do
+    get "/backflow"
+
+    assert_select "aside [data-module=backflow] a[href=?]", "/backflow", text: "Overview"
+    assert_select "aside [data-module=backflow] a[href=?]", "/backflow/testers", text: "Testers"
+  end
+
+  test "the current page is marked in the sidebar, including on sub-pages" do
+    { "/backflow" => "/backflow", "/backflow/testers" => "/backflow/testers",
+      "/backflow/testers/new" => "/backflow/testers" }.each do |visit, marked|
+      get visit
+      assert_select "aside [data-module-pages] a[aria-current=page]", { count: 1 }, "one current page on #{visit}"
+      assert_select "aside [data-module-pages] a[href=?][aria-current=page]", marked, { count: 1 }, "on #{visit}"
     end
   end
 
-  test "core pages do not show the module header" do
+  test "outside the module its pages stay collapsed" do
     get "/dashboard"
 
-    assert_select "[data-module-header]", count: 0
+    assert_select "aside a[href=?]", "/backflow", count: 1
+    assert_select "aside [data-module-pages]", count: 0
+  end
+
+  test "the module tab row is gone" do
+    get "/backflow"
+
+    assert_select "[data-module-tabs]", count: 0
   end
 end
