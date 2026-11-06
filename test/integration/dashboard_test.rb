@@ -69,13 +69,13 @@ class DashboardTest < ActionDispatch::IntegrationTest
     assert_select "main p", /City of Summit/
   end
 
-  test "module nav items sit above Settings" do
+  test "module links sit above Settings" do
     sign_in_to_summit.enable_module!(:backflow, by: nil)
 
     get "/dashboard"
 
     labels = css_select("aside nav li").map { |li| li.text.strip }
-    assert_operator labels.index("Inspections"), :<, labels.index("Settings")
+    assert_operator labels.index("Backflow Inspections"), :<, labels.index("Settings")
   end
 
   test "a tenant with backflow gets a card linking to it" do
@@ -105,7 +105,7 @@ class DashboardTest < ActionDispatch::IntegrationTest
 
   # Scoped to the sidebar's <aside> so the dashboard card's own link to
   # /backflow is not counted.
-  test "the sidebar shows Inspections only with the module" do
+  test "the sidebar links to a module only when the tenant has it" do
     tenant = sign_in_to_summit
 
     get "/dashboard"
@@ -113,7 +113,25 @@ class DashboardTest < ActionDispatch::IntegrationTest
 
     tenant.enable_module!(:backflow, by: nil)
     get "/dashboard"
-    assert_select "aside a[href=?]", "/backflow", text: /Inspections/, count: 1
+    assert_select "aside a[href=?]", "/backflow", text: /Backflow Inspections/, count: 1
+  end
+
+  test "the sidebar lists Dashboard, then modules, then Settings" do
+    sign_in_to_summit.enable_module!(:backflow, by: nil)
+
+    get "/dashboard"
+
+    labels = css_select("aside nav ul li").map { |li| li.text.strip }.reject(&:empty?)
+    assert_equal [ "Dashboard", "Backflow Inspections", "Settings" ], labels
+  end
+
+  # Module pages (Testers, etc.) moved inside their module.
+  test "the sidebar no longer has a Plumbers link" do
+    sign_in_to_summit.enable_module!(:backflow, by: nil)
+
+    get "/dashboard"
+
+    assert_select "aside", text: /Plumbers/, count: 0
   end
 
   test "a retired module row does not break the dashboard" do

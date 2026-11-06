@@ -21,6 +21,12 @@ class ApplicationController < ActionController::Base
     rodauth.require_account
   end
 
+  # The module the current page belongs to (a TenantModules::Definition), set
+  # by RequiresModule; nil on core pages.
+  def current_module
+    @current_module
+  end
+
   # Renders 404 rather than 403 so the existence of a resource or area is not
   # confirmed to anyone probing for it.
   def render_not_found
@@ -29,5 +35,5 @@ class ApplicationController < ActionController::Base
            layout: false
   end
 
-  helper_method :current_account, :current_tenant
+  helper_method :current_account, :current_tenant, :current_module
 end

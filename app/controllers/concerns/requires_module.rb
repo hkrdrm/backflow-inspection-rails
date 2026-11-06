@@ -18,7 +18,14 @@ module RequiresModule
       # Fail at load time: a typo here would otherwise 404 every tenant.
       raise ArgumentError, "unknown module: #{key}" unless definition
 
-      before_action { render_not_found unless current_tenant.module_enabled?(definition.key) }
+      before_action do
+        if current_tenant.module_enabled?(definition.key)
+          # Read by the module layout (header and tabs) and the sidebar.
+          @current_module = definition
+        else
+          render_not_found
+        end
+      end
     end
   end
 end

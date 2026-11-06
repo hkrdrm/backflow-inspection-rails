@@ -14,12 +14,11 @@ Rails.application.routes.draw do
 
   get "dashboard" => "dashboard#show", as: :dashboard
 
-  resources :plumbers, only: [ :index, :new, :create, :edit, :update ]
-
   # Module routes are always drawn; Backflow::BaseController's module guard is
   # the only gate, so the router never varies per tenant.
   namespace :backflow do
     root to: "home#show"
+    resources :testers, only: [ :index, :new, :create, :edit, :update ]
   end
 
   namespace :super_admin, path: "super-admin" do

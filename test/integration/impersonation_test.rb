@@ -3,6 +3,8 @@ require "test_helper"
 class ImpersonationTest < ActionDispatch::IntegrationTest
   setup do
     @tenant = Tenant.create(name: "Acme Water", slug: "acme")
+    # The writes below go to Testers, which lives in the backflow module.
+    @tenant.enable_module!(:backflow, by: nil)
     @boss = create_account(email: "boss@example.com", super_admin: true)
     @target = create_account(email: "target@acme.test", tenant_id: @tenant.id)
   end
@@ -171,7 +173,7 @@ class ImpersonationTest < ActionDispatch::IntegrationTest
     impersonate(@target)
 
     assert_difference -> { ImpersonationEvent.count }, 1 do
-      post "/plumbers", params: {
+      post "/backflow/testers", params: {
         plumber: { name: "Pat Pike", cert_number: "CERT-1" }
       }
     end
@@ -179,8 +181,8 @@ class ImpersonationTest < ActionDispatch::IntegrationTest
     event = ImpersonationEvent.order(:id).last
     assert_equal ImpersonationSession.order(:id).last.id, event.impersonation_session_id
     assert_equal "POST", event.request_method
-    assert_equal "/plumbers", event.path
-    assert_equal "plumbers#create", event.controller_action
+    assert_equal "/backflow/testers", event.path
+    assert_equal "backflow/testers#create", event.controller_action
   end
 
   # The trail exists to answer "who, and when", so both halves of "when" are
@@ -202,7 +204,7 @@ class ImpersonationTest < ActionDispatch::IntegrationTest
     impersonate(@target)
     after = Time.current
 
-    post "/plumbers", params: {
+    post "/backflow/testers", params: {
       plumber: { name: "Pat Pike", cert_number: "CERT-1" }
     }
     # Captured before stopping: the DELETE is itself an audited write, and its
@@ -216,7 +218,7 @@ class ImpersonationTest < ActionDispatch::IntegrationTest
     assert_operator session.started_at, :>=, before
     assert_operator session.started_at, :<=, after
 
-    assert_equal "plumbers#create", event.controller_action
+    assert_equal "backflow/testers#create", event.controller_action
     assert_operator event.created_at, :>=, session.started_at
     assert_operator event.created_at, :<=, session.ended_at
   end
@@ -226,7 +228,7 @@ class ImpersonationTest < ActionDispatch::IntegrationTest
     impersonate(@target)
 
     assert_difference -> { ImpersonationEvent.count }, 1 do
-      post "/plumbers", params: { plumber: { name: "", cert_number: "" } }
+      post "/backflow/testers", params: { plumber: { name: "", cert_number: "" } }
     end
   end
 
@@ -235,7 +237,7 @@ class ImpersonationTest < ActionDispatch::IntegrationTest
     impersonate(@target)
 
     assert_no_difference -> { ImpersonationEvent.count } do
-      get "/plumbers"
+      get "/backflow/testers"
     end
   end
 

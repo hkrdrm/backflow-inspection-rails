@@ -1,0 +1,33 @@
+<%#
+  Shared frame for every page inside a module: the module's name and its tabs,
+  then the page. Nested inside the app layout, so the sidebar and topbar are
+  unchanged. The current tab is the one whose path is the longest prefix of
+  this request's path, so a tab stays current on its sub-pages
+  (/backflow/testers/new keeps "Testers" current, not "Overview").
+%>
+<% tabs = current_module.tabs.map { |tab| tab.merge(href: public_send(tab[:path])) } %>
+<% current_tab = tabs.select { |tab| request.path == tab[:href] || request.path.start_with?("#{tab[:href]}/") }
+                     .max_by { |tab| tab[:href].length } %>
+
+<% content_for :content do %>
+  <div class="mx-auto max-w-7xl">
+    <div data-module-header>
+      <h1 class="text-2xl font-bold text-navy"><%= current_module.name %></h1>
+    </div>
+
+    <nav data-module-tabs class="mt-4 flex gap-6 overflow-x-auto border-b border-line" aria-label="<%= current_module.name %>">
+      <% tabs.each do |tab| %>
+        <% current = tab.equal?(current_tab) %>
+        <%= link_to tab[:label], tab[:href],
+              "aria-current": (current ? "page" : nil),
+              class: "-mb-px whitespace-nowrap border-b-2 px-1 pb-3 text-sm font-semibold transition #{current ? 'border-brand text-brand' : 'border-transparent text-muted hover:text-navy'}" %>
+      <% end %>
+    </nav>
+
+    <div class="mt-6">
+      <%= yield %>
+    </div>
+  </div>
+<% end %>
+
+<%= render template: "layouts/app" %>

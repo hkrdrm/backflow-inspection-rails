@@ -1,0 +1,18 @@
+<%#
+  Spatial Data Engineering logo: the mark plus the wordmark, as HTML text so
+  it stays crisp and can switch colour by background.
+
+    render "shared/logo", tone: :light   # navy wordmark, for white backgrounds
+    render "shared/logo", tone: :dark    # white wordmark, for navy backgrounds
+
+  The mark (sde-mark.svg) is a temporary drawing from the brand mockup;
+  replace the file when the final logo exists.
+%>
+<% tone = local_assigns.fetch(:tone, :light) %>
+<span class="inline-flex items-center gap-3">
+  <%= image_tag "sde-mark.svg", alt: "Spatial Data Engineering", class: "h-10 w-auto shrink-0" %>
+  <span class="leading-none" aria-hidden="true">
+    <span class="block text-[17px] font-extrabold tracking-tight <%= tone == :dark ? 'text-white' : 'text-navy' %>">SPATIAL DATA</span>
+    <span class="mt-1 block text-[8px] font-semibold tracking-[0.42em] <%= tone == :dark ? 'text-sky' : 'text-navy' %>">ENGINEERING</span>
+  </span>
+</span>
