@@ -16,6 +16,12 @@ Rails.application.routes.draw do
 
   resources :plumbers, only: [ :index, :new, :create, :edit, :update ]
 
+  # Module routes are always drawn; Backflow::BaseController's module guard is
+  # the only gate, so the router never varies per tenant.
+  namespace :backflow do
+    root to: "home#show"
+  end
+
   namespace :super_admin, path: "super-admin" do
     resources :tenants, only: [ :index, :new, :create, :edit, :update ] do
       member do
