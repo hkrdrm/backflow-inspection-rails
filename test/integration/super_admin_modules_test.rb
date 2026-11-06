@@ -130,4 +130,18 @@ class SuperAdminModulesTest < ActionDispatch::IntegrationTest
     assert_response :not_found
     assert_equal "active", PlatformModule.status_for(:backflow)
   end
+
+  # Cards need to stand apart from the page, with the left edge showing status.
+  test "each module card is outlined, with a status-coloured left edge" do
+    PlatformModule.set_status!(:example, "disabled", by: nil)
+    sign_in @boss
+
+    get "/super-admin/modules"
+
+    classes = ->(key) { css_select("section[data-module=#{key}]").first["class"].split }
+    assert_includes classes.("backflow"), "shadow-sm"
+    assert_includes classes.("backflow"), "border-l-4"
+    assert_includes classes.("backflow"), "border-l-brand"
+    assert_not_includes classes.("example"), "border-l-brand"
+  end
 end
