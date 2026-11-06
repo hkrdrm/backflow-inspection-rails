@@ -31,7 +31,6 @@ class BrandingTest < ActionDispatch::IntegrationTest
     get "/dashboard"
 
     assert_select "aside img[alt=?]", BRAND
-    assert_select "aside", /Contact your administrator/
     assert_no_old_brand
   end
 
@@ -40,7 +39,7 @@ class BrandingTest < ActionDispatch::IntegrationTest
 
     get "/backflow"
 
-    assert_select "[data-module-header] h1", "Backflow Inspections"
+    assert_select "[data-breadcrumb]", /Backflow Inspections/
     assert_no_old_brand
   end
 

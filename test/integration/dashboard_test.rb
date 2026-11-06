@@ -69,13 +69,13 @@ class DashboardTest < ActionDispatch::IntegrationTest
     assert_select "main p", /City of Summit/
   end
 
-  test "module links sit above Settings" do
+  test "module links sit above the organization links" do
     sign_in_to_summit.enable_module!(:backflow, by: nil)
 
     get "/dashboard"
 
     labels = css_select("aside nav li").map { |li| li.text.strip }
-    assert_operator labels.index("Backflow Inspections"), :<, labels.index("Settings")
+    assert_operator labels.index("Backflow Inspections"), :<, labels.index("Team")
   end
 
   test "a tenant with backflow gets a card linking to it" do
@@ -116,13 +116,41 @@ class DashboardTest < ActionDispatch::IntegrationTest
     assert_select "aside a[href=?]", "/backflow", text: /Backflow Inspections/, count: 1
   end
 
-  test "the sidebar lists Dashboard, then modules, then Settings" do
+  test "the sidebar is Overview, then Your modules, then Organization" do
     sign_in_to_summit.enable_module!(:backflow, by: nil)
 
     get "/dashboard"
 
-    labels = css_select("aside nav ul li").map { |li| li.text.strip }.reject(&:empty?)
-    assert_equal [ "Dashboard", "Backflow Inspections", "Settings" ], labels
+    headings = css_select("aside [data-nav-heading]").map { |h| h.text.strip }
+    assert_equal [ "Your modules", "Organization" ], headings
+    labels = css_select("aside [data-nav-item]").map { |item| item.text.strip }
+    assert_equal [ "Overview", "Backflow Inspections", "Team", "Company settings", "Billing" ], labels
+  end
+
+  test "a tenant with no modules gets no modules section" do
+    sign_in_to_summit
+
+    get "/dashboard"
+
+    assert_select "aside [data-nav-heading]", text: "Your modules", count: 0
+  end
+
+  test "the sidebar names the organization" do
+    sign_in_to_summit
+
+    get "/dashboard"
+
+    assert_select "aside [data-organization]", text: "City of Summit"
+  end
+
+  test "the signed-in account sits at the bottom of the sidebar with log out" do
+    sign_in_to_summit
+
+    get "/dashboard"
+
+    assert_select "aside [data-account]", /Owner/
+    assert_select "aside [data-account]", /My account/
+    assert_select "aside [data-account] form[action=?]", "/logout"
   end
 
   # Module pages (Testers, etc.) moved inside their module.

@@ -1,32 +1,27 @@
 <%#
-  Shared frame for every page inside a module: the module's name and its tabs,
-  then the page. Nested inside the app layout, so the sidebar and topbar are
-  unchanged. The current tab is the one whose path is the longest prefix of
-  this request's path, so a tab stays current on its sub-pages
-  (/backflow/testers/new keeps "Testers" current, not "Overview").
+  Shared frame for every page inside a module: a breadcrumb (home › module ›
+  page) above the page. The module's pages themselves are listed in the
+  sidebar. Nested inside the app layout.
 %>
-<% tabs = current_module.tabs.map { |tab| tab.merge(href: public_send(tab[:path])) } %>
-<% current_tab = tabs.select { |tab| request.path == tab[:href] || request.path.start_with?("#{tab[:href]}/") }
-                     .max_by { |tab| tab[:href].length } %>
+<% pages = module_pages(current_module) %>
+<% current_page = pages.find { |page| page[:current] } %>
 
 <% content_for :content do %>
   <div class="mx-auto max-w-7xl">
-    <div data-module-header>
-      <h1 class="text-2xl font-bold text-navy"><%= current_module.name %></h1>
-    </div>
-
-    <nav data-module-tabs class="mt-4 flex gap-6 overflow-x-auto border-b border-line" aria-label="<%= current_module.name %>">
-      <% tabs.each do |tab| %>
-        <% current = tab.equal?(current_tab) %>
-        <%= link_to tab[:label], tab[:href],
-              "aria-current": (current ? "page" : nil),
-              class: "-mb-px whitespace-nowrap border-b-2 px-1 pb-3 text-sm font-semibold transition #{current ? 'border-brand text-brand' : 'border-transparent text-muted hover:text-navy'}" %>
+    <nav data-breadcrumb aria-label="Breadcrumb" class="mb-4 flex items-center gap-2 text-sm text-muted">
+      <%= link_to dashboard_path, class: "hover:text-navy", title: "Overview" do %>
+        <%= render "shared/icon", name: :home, class: "size-4" %>
+        <span class="sr-only">Overview</span>
+      <% end %>
+      <span aria-hidden="true">›</span>
+      <%= link_to current_module.name, public_send(current_module.home_path), class: "font-semibold hover:text-navy" %>
+      <% if current_page %>
+        <span aria-hidden="true">›</span>
+        <span aria-current="page" class="font-semibold text-navy"><%= current_page[:label] %></span>
       <% end %>
     </nav>
 
-    <div class="mt-6">
-      <%= yield %>
-    </div>
+    <%= yield %>
   </div>
 <% end %>
 
