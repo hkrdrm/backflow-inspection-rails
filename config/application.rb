@@ -34,6 +34,16 @@ module RailsRodauthSetup
     # schema.rb could not rebuild this database from scratch.
     config.sequel.schema_format = :sql
 
+    # Check a pooled connection that has sat idle for over a minute before
+    # handing it out, and replace it if the server has dropped it (Postgres
+    # restart, idle SSL timeout). Without this the first request after such a
+    # drop fails with PG::ConnectionBad. The check is one cheap query, only
+    # for idle connections.
+    config.sequel.after_connect = proc do
+      Sequel::Model.db.extension :connection_validator
+      Sequel::Model.db.pool.connection_validation_timeout = 60
+    end
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files
