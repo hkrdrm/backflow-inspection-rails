@@ -3,7 +3,8 @@ module SuperAdmin
     before_action :set_tenant, only: [ :edit, :update, :activate, :deactivate ]
 
     def index
-      @tenants = Tenant.order(:name).all
+      # Active tenants first, then inactive; alphabetical within each group.
+      @tenants = Tenant.order(Sequel.desc(:active), :name).all
       @account_counts = Account.where(tenant_id: @tenants.map(&:id))
                                .group_and_count(:tenant_id)
                                .to_hash(:tenant_id, :count)

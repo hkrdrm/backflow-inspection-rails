@@ -88,4 +88,16 @@ class SuperAdminTenantsTest < ActionDispatch::IntegrationTest
 
     assert_equal "Renamed", tenant.reload.name
   end
+
+  test "lists active tenants first, then inactive, each alphabetically" do
+    Tenant.create(name: "Zephyr Water", slug: "zephyr")
+    Tenant.create(name: "Alpha Utilities", slug: "alpha").update(active: false)
+    Tenant.create(name: "Bayou Backflow", slug: "bayou")
+    Tenant.create(name: "Cypress Parish", slug: "cypress").update(active: false)
+
+    get "/super-admin/tenants"
+
+    names = css_select("tbody tr td:first-child").map { |td| td.text.strip }
+    assert_equal [ "Bayou Backflow", "Zephyr Water", "Alpha Utilities", "Cypress Parish" ], names
+  end
 end
