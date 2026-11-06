@@ -72,37 +72,48 @@ class SuperAdminModulesTest < ActionDispatch::IntegrationTest
 
     get "/super-admin/modules"
 
-    assert_select "[data-module=backflow] [data-status]", "Active"
+    assert_select "[data-module=backflow] [data-status]", "Enabled"
   end
 
   test "a super admin changes a module's status, and it is logged" do
     sign_in @boss
 
-    patch "/super-admin/modules/backflow", params: { status: "planned" }
+    patch "/super-admin/modules/backflow", params: { status: "disabled" }
 
     assert_redirected_to "/super-admin/modules"
-    assert_equal "Backflow Inspections is now Planned.", flash[:notice]
-    assert_equal "planned", PlatformModule.status_for(:backflow)
-    assert_equal [ "active", "planned", @boss.id ],
+    assert_equal "Backflow Inspections is now Disabled.", flash[:notice]
+    assert_equal "disabled", PlatformModule.status_for(:backflow)
+    assert_equal [ "active", "disabled", @boss.id ],
                  PlatformModuleEvent.order(:id).last.values.values_at(:from_status, :to_status, :account_id)
   end
 
-  test "the status buttons offer the other statuses, and Disable asks first" do
+  test "an enabled module offers Disable, which asks first" do
     sign_in @boss
 
     get "/super-admin/modules"
 
     assert_select "[data-module=backflow] form[action=?] button", "/super-admin/modules/backflow", text: "Disable"
-    assert_select "[data-module=backflow] form[action=?] button", "/super-admin/modules/backflow", text: "Mark planned"
-    assert_select "[data-module=backflow] form[action='/super-admin/modules/backflow'] button",
-                  { text: "Activate", count: 0 }, "already active"
     assert_select "[data-module=backflow] form[data-turbo-confirm]", 1
+    assert_select "[data-module=backflow] button", { text: "Enable", count: 0 }, "already enabled"
+  end
+
+  test "a disabled module offers Enable" do
+    PlatformModule.set_status!(:backflow, "disabled", by: nil)
+    sign_in @boss
+
+    get "/super-admin/modules"
+
+    assert_select "[data-module=backflow] [data-status]", "Disabled"
+    assert_select "[data-module=backflow] form[action=?] button", "/super-admin/modules/backflow", text: "Enable"
   end
 
   test "an unknown status or module is rejected" do
     sign_in @boss
 
     patch "/super-admin/modules/backflow", params: { status: "retired" }
+    assert_response :unprocessable_entity
+
+    patch "/super-admin/modules/backflow", params: { status: "planned" }
     assert_response :unprocessable_entity
     assert_equal "active", PlatformModule.status_for(:backflow)
 

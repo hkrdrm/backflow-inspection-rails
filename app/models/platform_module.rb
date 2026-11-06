@@ -1,14 +1,14 @@
-# What the platform does with each module defined in TenantModules::Registry:
+# Whether each module defined in TenantModules::Registry is switched on for
+# the platform (shown to super admins as Enabled / Disabled):
 #
 #   active    can be added to tenants; tenants who have it use it
 #   disabled  can't be added; tenants who have it lose access (assignment and
-#             data are kept, and come back when it's active again)
-#   planned   can't be added; shown to tenants as "Coming soon"
+#             data are kept, and come back when it's enabled again)
 #
 # A registered module with no row counts as disabled, so a module shipped in
 # code stays off everywhere until a super admin activates it.
 class PlatformModule < Sequel::Model
-  STATUSES = %w[active disabled planned].freeze
+  STATUSES = %w[active disabled].freeze
   DEFAULT_STATUS = "disabled".freeze
 
   # Raised when adding a module to a tenant while it isn't active platform-wide.
@@ -24,11 +24,6 @@ class PlatformModule < Sequel::Model
 
   def self.active_keys
     where(status: "active", module_key: TenantModules::Registry.keys).select_map(:module_key)
-  end
-
-  def self.planned_modules
-    keys = where(status: "planned").select_map(:module_key)
-    TenantModules::Registry.all.select { |definition| keys.include?(definition.key) }
   end
 
   # Returns true if the status changed. The row and its audit event are written

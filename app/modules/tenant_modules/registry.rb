@@ -18,6 +18,18 @@ module TenantModules
           { label: "Overview", path: :backflow_root_path },
           { label: "Testers", path: :backflow_testers_path }
         ].freeze
+      ),
+      # The template module: copy it to start a new one (see docs/modules.md).
+      # Ships disabled platform-wide like every new module.
+      Definition.new(
+        key: "example",
+        name: "Example Module",
+        description: "A template to copy when building a new module: two pages, tenant-scoped data and tests.",
+        icon: :document,
+        pages: [
+          { label: "Overview", path: :example_root_path },
+          { label: "Items", path: :example_items_path }
+        ].freeze
       )
     ].freeze
 

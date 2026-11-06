@@ -10,7 +10,7 @@
     <span class="font-semibold">New modules are built in code.</span>
     A module is declared in <code class="rounded bg-white px-1.5 py-0.5 text-xs">app/modules/tenant_modules/registry.rb</code>
     with its pages under its own namespace, and appears here as <span class="font-semibold">Disabled</span>
-    once it ships, so it stays off everywhere until you activate it. Add a module to a tenant from that tenant's page.
+    once it ships, so it stays off everywhere until you enable it. Add a module to a tenant from that tenant's page.
   </div>
 
   <div class="grid gap-4 md:grid-cols-2">
@@ -25,7 +25,7 @@
           <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-2">
               <h2 class="text-lg font-bold text-navy"><%= definition.name %></h2>
-              <span data-status class="rounded-full px-2.5 py-0.5 text-xs font-semibold <%= { "active" => "bg-ok-pale/50 text-ok", "planned" => "bg-warn/25 text-warn-strong", "disabled" => "bg-line text-navy/70" }.fetch(status) %>"><%= SuperAdmin::ModulesController::STATUS_LABELS.fetch(status) %></span>
+              <span data-status class="rounded-full px-2.5 py-0.5 text-xs font-semibold <%= status == "active" ? "bg-ok-pale/50 text-ok" : "bg-line text-navy/70" %>"><%= SuperAdmin::ModulesController::STATUS_LABELS.fetch(status) %></span>
             </div>
             <p class="mt-1 text-sm text-navy/70"><%= definition.description %></p>
           </div>
@@ -57,13 +57,13 @@
           </div>
         </dl>
 
-        <%# Each button moves the module to another status. Disable cuts off
-            every tenant using it, so it asks first. %>
+        <%# Enable or Disable for the whole platform. Disable cuts off every
+            tenant using it, so it asks first. %>
         <div class="mt-5 flex flex-wrap gap-2 border-t border-line pt-4">
-          <% { "active" => "Activate", "planned" => "Mark planned", "disabled" => "Disable" }.each do |target, label| %>
+          <% { "active" => "Enable", "disabled" => "Disable" }.each do |target, label| %>
             <% next if target == status %>
             <% confirm = if target == "disabled" && tenants.any?
-                           "Disable #{definition.name} for the whole platform? The #{pluralize(tenants.size, 'tenant')} using it lose access until it's active again. Their data is kept."
+                           "Disable #{definition.name} for the whole platform? The #{pluralize(tenants.size, 'tenant')} using it lose access until it's enabled again. Their data is kept."
                          elsif target == "disabled"
                            "Disable #{definition.name} for the whole platform?"
                          end %>

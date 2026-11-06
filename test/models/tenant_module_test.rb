@@ -115,13 +115,11 @@ class TenantModuleTest < ActiveSupport::TestCase
     assert @tenant.refresh.module_enabled?(:backflow)
   end
 
-  test "only active modules can be added to a tenant" do
-    %w[disabled planned].each do |status|
-      PlatformModule.set_status!(:backflow, status, by: @boss)
+  test "only modules enabled platform-wide can be added to a tenant" do
+    PlatformModule.set_status!(:backflow, "disabled", by: @boss)
 
-      assert_raises(PlatformModule::NotActive) { @tenant.enable_module!(:backflow, by: @boss) }
-      assert_empty @tenant.refresh.assigned_modules
-    end
+    assert_raises(PlatformModule::NotActive) { @tenant.enable_module!(:backflow, by: @boss) }
+    assert_empty @tenant.refresh.assigned_modules
   end
 
   test "a module can be removed from a tenant whatever its platform status" do

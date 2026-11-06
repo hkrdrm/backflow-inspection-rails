@@ -21,6 +21,13 @@ Rails.application.routes.draw do
     resources :testers, only: [ :index, :new, :create, :edit, :update ]
   end
 
+  # The template module (see docs/modules.md). Same shape as every module: one
+  # namespace named after the registry key, gated by Example::BaseController.
+  namespace :example do
+    root to: "home#show"
+    resources :items, only: [ :index, :new, :create ]
+  end
+
   namespace :super_admin, path: "super-admin" do
     resources :tenants, only: [ :index, :new, :create, :edit, :update ] do
       member do
@@ -48,7 +55,7 @@ Rails.application.routes.draw do
     end
 
     # Catalog of modules (created in code, not here) and their platform-wide
-    # status (PATCH with status=active|disabled|planned).
+    # status (PATCH with status=active|disabled).
     resources :modules, only: [ :index, :update ], param: :key
 
     root to: "tenants#index"
